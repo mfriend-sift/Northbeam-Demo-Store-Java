@@ -9,7 +9,7 @@ import com.northbeam.store.lib.Reply;
 import com.northbeam.store.lib.Sessions;
 import com.northbeam.store.lib.Verification;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.ResponseEntity;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class VerificationApi {
     // Sends a verification code by email or sms (a stand-in sender: nothing leaves the process). The work is in Verification.
     @PostMapping("/api/verification/start")
-    public ResponseEntity<byte[]> start(HttpServletRequest http) {
-        return Api.run(http, req -> {
+    public void start(HttpServletRequest http, HttpServletResponse res) {
+        Api.run(http, res, req -> {
             User user = Db.findUser(Sessions.of(req).userId);
             if (user == null) return Reply.error(401, "Sign in first");
             Object channel = Js.get(Http.jsonBody(req), "channel");
@@ -28,8 +28,8 @@ public class VerificationApi {
     }
 
     @PostMapping("/api/verification/confirm")
-    public ResponseEntity<byte[]> confirm(HttpServletRequest http) {
-        return Api.run(http, req -> {
+    public void confirm(HttpServletRequest http, HttpServletResponse res) {
+        Api.run(http, res, req -> {
             User user = Db.findUser(Sessions.of(req).userId);
             if (user == null) return Reply.error(401, "Sign in first");
             Object code = Js.get(Http.jsonBody(req), "code");

@@ -21,7 +21,11 @@ public final class Clock {
     /** new Date().toISOString() for a time the store does not take from the request (the mailer's outbox). */
     public static String isoNow() { return iso(System.currentTimeMillis()); }
 
+    // A time outside years 0001 to 9999 has no four-digit year: the answer is the error 500, as the reference store's.
+    private static final double MIN_MS = -62135596800000.0, MAX_MS = 253402300799999.0;
+
     private static String iso(double ms) {
+        if (ms < MIN_MS || ms > MAX_MS) throw new IllegalStateException("time out of range");
         return ISO.format(Instant.ofEpochMilli((long) (ms < 0 ? Math.ceil(ms) : Math.floor(ms))));
     }
 }

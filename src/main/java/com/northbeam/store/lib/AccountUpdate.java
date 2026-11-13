@@ -19,7 +19,7 @@ public final class AccountUpdate {
     public static void updateAccount(User user, HttpServletRequest req) {
         String change = "profile";
         List<String> fields = new ArrayList<>();
-        String path = req.getRequestURI();
+        String path = Http.rawPath(req);
         if (path.regionMatches(true, 0, "/api", 0, 4)) path = path.substring(4); // the path under the /api mount
         if (path.equals("/account/payment-method")) {
             change = req.getMethod().equals("DELETE") ? "payment_method_removed" : "payment_method_saved";

@@ -22,10 +22,10 @@ import com.northbeam.store.lib.Promo;
 import com.northbeam.store.lib.Reply;
 import com.northbeam.store.lib.Sessions;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,8 +54,8 @@ public class OrdersApi {
 
     // Saves the cart as an order. Not paid yet: payment is a separate step (POST /api/orders/{id}/pay).
     @PostMapping("/api/orders")
-    public ResponseEntity<byte[]> save(HttpServletRequest http) {
-        return Api.run(http, req -> {
+    public void save(HttpServletRequest http, HttpServletResponse res) {
+        Api.run(http, res, req -> {
             User user = Db.findUser(Sessions.of(req).userId);
             if (user == null) return signInFirst();
 
@@ -117,8 +117,8 @@ public class OrdersApi {
 
     // Changes the shipping address or method of an order, before or after payment.
     @PutMapping("/api/orders/{id}/shipping")
-    public ResponseEntity<byte[]> shipping(HttpServletRequest http, @PathVariable String id) {
-        return Api.run(http, req -> {
+    public void shipping(HttpServletRequest http, HttpServletResponse res, @PathVariable String id) {
+        Api.run(http, res, req -> {
             User user = Db.findUser(Sessions.of(req).userId);
             if (user == null) return signInFirst();
             Order order = Db.findOrder(id);
@@ -144,14 +144,14 @@ public class OrdersApi {
      * claim the order (under the lock), call the gateway (no lock), finish or put back (under the lock).
      */
     @PostMapping("/api/orders/{id}/pay")
-    public ResponseEntity<byte[]> pay(HttpServletRequest req, @PathVariable String id) {
+    public void pay(HttpServletRequest req, HttpServletResponse res, @PathVariable String id) {
         Claim[] claimed = new Claim[1];
         Reply early;
         try {
             com.northbeam.store.lib.Http.checkParams(req);
             early = Db.sync(() -> takeClaim(req, id, claimed));
         } catch (ApiException e) { early = Reply.error(e.status, e.getMessage()); }
-        if (early != null) return early.entity();
+        if (early != null) { early.writeTo(res); return; }
         Claim claim = claimed[0];
 
         // One gateway call per attempt. If it throws, undo the claim (the order must never stay pending) and answer 502.
@@ -163,13 +163,13 @@ public class OrdersApi {
         }
 
         Charge result = charge;
-        return Db.sync(() -> finishPay(req, claim, result)).entity();
+        Db.sync(() -> finishPay(req, claim, result)).writeTo(res);
     }
 
     // Cancels one of the user's orders: not yet shipped, not in dispute.
     @PostMapping("/api/orders/{id}/cancel")
-    public ResponseEntity<byte[]> cancel(HttpServletRequest http, @PathVariable String id) {
-        return Api.run(http, req -> {
+    public void cancel(HttpServletRequest http, HttpServletResponse res, @PathVariable String id) {
+        Api.run(http, res, req -> {
             User user = Db.findUser(Sessions.of(req).userId);
             if (user == null) return signInFirst();
             Order order = Db.findOrder(id);
@@ -182,8 +182,8 @@ public class OrdersApi {
     }
 
     @GetMapping("/api/orders")
-    public ResponseEntity<byte[]> list(HttpServletRequest http) {
-        return Api.run(http, req -> {
+    public void list(HttpServletRequest http, HttpServletResponse res) {
+        Api.run(http, res, req -> {
             String userId = Sessions.of(req).userId;
             List<Order> mine = new ArrayList<>();
             for (Order o : Db.orders) if (o.userId.equals(userId)) mine.add(o);

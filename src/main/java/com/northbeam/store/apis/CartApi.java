@@ -13,9 +13,9 @@ import com.northbeam.store.lib.Promo;
 import com.northbeam.store.lib.Reply;
 import com.northbeam.store.lib.Sessions;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,8 +27,8 @@ public class CartApi {
     private static Reply signInFirst() { return Reply.error(401, "Sign in first"); }
 
     @PostMapping("/api/cart/items")
-    public ResponseEntity<byte[]> addItem(HttpServletRequest http) {
-        return Api.run(http, req -> {
+    public void addItem(HttpServletRequest http, HttpServletResponse res) {
+        Api.run(http, res, req -> {
             User user = Db.findUser(Sessions.of(req).userId);
             if (user == null) return signInFirst();
 
@@ -55,8 +55,8 @@ public class CartApi {
 
     // Removes one line from the cart (all of its quantity). The work is in Cart.removeCartLine.
     @DeleteMapping("/api/cart/items/{productId}")
-    public ResponseEntity<byte[]> removeItem(HttpServletRequest http, @PathVariable String productId) {
-        return Api.run(http, req -> {
+    public void removeItem(HttpServletRequest http, HttpServletResponse res, @PathVariable String productId) {
+        Api.run(http, res, req -> {
             User user = Db.findUser(Sessions.of(req).userId);
             if (user == null) return signInFirst();
             Cart.Removal result = Cart.removeCartLine(user.id, productId);
@@ -66,14 +66,14 @@ public class CartApi {
     }
 
     @GetMapping("/api/cart")
-    public ResponseEntity<byte[]> view(HttpServletRequest http) {
-        return Api.run(http, req -> Reply.json(200, Promo.cartView(Sessions.of(req).userId, req)));
+    public void view(HttpServletRequest http, HttpServletResponse res) {
+        Api.run(http, res, req -> Reply.json(200, Promo.cartView(Sessions.of(req).userId, req)));
     }
 
     // Applies a promo code to the cart. The decision and its record are in Promo.applyPromo: 200 with the cart when accepted, 422 when rejected.
     @PostMapping("/api/cart/promo")
-    public ResponseEntity<byte[]> applyPromo(HttpServletRequest http) {
-        return Api.run(http, req -> {
+    public void applyPromo(HttpServletRequest http, HttpServletResponse res) {
+        Api.run(http, res, req -> {
             User user = Db.findUser(Sessions.of(req).userId);
             if (user == null) return signInFirst();
             Object code = Js.get(Http.jsonBody(req), "code");
@@ -85,8 +85,8 @@ public class CartApi {
     }
 
     @DeleteMapping("/api/cart/promo")
-    public ResponseEntity<byte[]> removePromo(HttpServletRequest http) {
-        return Api.run(http, req -> {
+    public void removePromo(HttpServletRequest http, HttpServletResponse res) {
+        Api.run(http, res, req -> {
             User user = Db.findUser(Sessions.of(req).userId);
             if (user == null) return signInFirst();
             Http.jsonBody(req); // same Content-Type rule as the other routes (a body of another type is 415)

@@ -52,24 +52,15 @@ public final class Middleware extends OncePerRequestFilter {
             }
             if (!body(req, response)) return; // refused as too large
             session(req, response);
-            if (!Config.demo() && "OPTIONS".equals(req.getMethod())) { write(response, Reply.error(404, "Not found"), false); return; }
+            if (!Config.demo() && "OPTIONS".equals(req.getMethod())) { Reply.error(404, "Not found").writeTo(response); return; }
             chain.doFilter(req, response);
         } catch (ApiException e) {
-            if (!response.isCommitted()) write(response, Reply.error(e.status, e.getMessage()), false);
+            if (!response.isCommitted()) Reply.error(e.status, e.getMessage()).writeTo(response);
         } catch (Throwable e) {
             System.err.println(e);
             e.printStackTrace();
-            if (!response.isCommitted()) { response.reset(); write(response, Reply.error(500, "Something went wrong"), false); }
+            if (!response.isCommitted()) { response.reset(); Reply.error(500, "Something went wrong").writeTo(response); }
         }
-    }
-
-    /** Writes a Reply as the whole answer. */
-    public static void write(HttpServletResponse res, Reply reply, boolean head) throws IOException {
-        byte[] bytes = reply.body().getBytes(java.nio.charset.StandardCharsets.UTF_8);
-        res.setStatus(reply.status());
-        res.setContentType("application/json; charset=utf-8");
-        res.setContentLength(bytes.length);
-        if (!head) res.getOutputStream().write(bytes);
     }
 
     // Demo-mode step, only when DEMO=1 (set by tools/run.sh).
@@ -171,7 +162,7 @@ public final class Middleware extends OncePerRequestFilter {
 
     private static void tooLarge(HttpServletResponse res) throws IOException {
         res.setHeader("Connection", "close");
-        write(res, Reply.error(413, "Request body too large"), false);
+        Reply.error(413, "Request body too large").writeTo(res);
     }
 
     /*

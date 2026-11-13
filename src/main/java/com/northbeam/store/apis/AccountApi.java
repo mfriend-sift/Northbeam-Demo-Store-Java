@@ -16,7 +16,7 @@ import com.northbeam.store.lib.Sessions;
 import com.northbeam.store.lib.Text;
 import com.northbeam.store.lib.Verification;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.ResponseEntity;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -33,8 +33,8 @@ public class AccountApi {
     private static Reply signInFirst() { return Reply.error(401, "Sign in first"); }
 
     @GetMapping("/api/account")
-    public ResponseEntity<byte[]> get(HttpServletRequest http) {
-        return Api.run(http, req -> {
+    public void get(HttpServletRequest http, HttpServletResponse res) {
+        Api.run(http, res, req -> {
             User user = Db.findUser(Sessions.of(req).userId);
             if (user == null) return signInFirst();
             JsObject shown = new JsObject().set("id", user.id).set("name", user.name).set("email", user.email).set("phone", user.phone)
@@ -46,8 +46,8 @@ public class AccountApi {
     }
 
     @PutMapping("/api/account")
-    public ResponseEntity<byte[]> update(HttpServletRequest http) {
-        return Api.run(http, req -> {
+    public void update(HttpServletRequest http, HttpServletResponse res) {
+        Api.run(http, res, req -> {
             User user = Db.findUser(Sessions.of(req).userId);
             if (user == null) return signInFirst();
 
@@ -87,8 +87,8 @@ public class AccountApi {
 
     // The saved card on file: a token (kept server-side, never returned), the BIN and the last four digits. Absent until saved.
     @PutMapping("/api/account/payment-method")
-    public ResponseEntity<byte[]> savePaymentMethod(HttpServletRequest http) {
-        return Api.run(http, req -> {
+    public void savePaymentMethod(HttpServletRequest http, HttpServletResponse res) {
+        Api.run(http, res, req -> {
             User user = Db.findUser(Sessions.of(req).userId);
             if (user == null) return signInFirst();
             PaymentMethods.SaveResult result = PaymentMethods.savePaymentMethod(user, Http.jsonBody(req));
@@ -99,8 +99,8 @@ public class AccountApi {
     }
 
     @DeleteMapping("/api/account/payment-method")
-    public ResponseEntity<byte[]> removePaymentMethod(HttpServletRequest http) {
-        return Api.run(http, req -> {
+    public void removePaymentMethod(HttpServletRequest http, HttpServletResponse res) {
+        Api.run(http, res, req -> {
             User user = Db.findUser(Sessions.of(req).userId);
             if (user == null) return signInFirst();
             PaymentMethods.removePaymentMethod(user);
@@ -110,8 +110,8 @@ public class AccountApi {
     }
 
     @PutMapping("/api/account/password")
-    public ResponseEntity<byte[]> changePassword(HttpServletRequest http) {
-        return Api.run(http, req -> {
+    public void changePassword(HttpServletRequest http, HttpServletResponse res) {
+        Api.run(http, res, req -> {
             User user = Db.findUser(Sessions.of(req).userId);
             if (user == null) return signInFirst();
 

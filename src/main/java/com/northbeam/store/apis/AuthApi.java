@@ -13,8 +13,8 @@ import com.northbeam.store.lib.Reply;
 import com.northbeam.store.lib.Signing;
 import com.northbeam.store.lib.Text;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.regex.Pattern;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -39,8 +39,8 @@ public class AuthApi {
     }
 
     @PostMapping("/api/signup")
-    public ResponseEntity<byte[]> signup(HttpServletRequest http) {
-        return Api.run(http, req -> {
+    public void signup(HttpServletRequest http, HttpServletResponse res) {
+        Api.run(http, res, req -> {
             JsObject body = Http.jsonBody(req);
             Object name = Js.get(body, "name");
             Object email = Js.get(body, "email");
@@ -74,8 +74,8 @@ public class AuthApi {
     }
 
     @PostMapping("/api/login")
-    public ResponseEntity<byte[]> login(HttpServletRequest http) {
-        return Api.run(http, req -> {
+    public void login(HttpServletRequest http, HttpServletResponse res) {
+        Api.run(http, res, req -> {
             JsObject body = Http.jsonBody(req);
             Login.Outcome outcome = Login.attemptLogin(Js.get(body, "email"), Js.get(body, "password"), req);
             if (outcome.status().equals("failure")) return Reply.error(401, "Invalid email or password");
@@ -84,8 +84,8 @@ public class AuthApi {
     }
 
     @PostMapping("/api/logout")
-    public ResponseEntity<byte[]> logout(HttpServletRequest http) {
-        return Api.run(http, req -> {
+    public void logout(HttpServletRequest http, HttpServletResponse res) {
+        Api.run(http, res, req -> {
             Signing.signOut(req);
             return Reply.json(200, new JsObject().set("ok", true));
         });

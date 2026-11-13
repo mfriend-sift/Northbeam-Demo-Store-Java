@@ -2,7 +2,7 @@ package com.northbeam.store.apis;
 
 import com.northbeam.store.lib.ApiException;
 import com.northbeam.store.lib.Reply;
-import org.springframework.http.ResponseEntity;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class ErrorHandlers {
     @ExceptionHandler(ApiException.class)
-    public ResponseEntity<byte[]> api(ApiException e) { return Reply.error(e.status, e.getMessage()).entity(); }
+    public void api(ApiException e, HttpServletResponse res) { Reply.error(e.status, e.getMessage()).writeTo(res); }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<byte[]> other(Exception e) {
-        if (e instanceof ErrorResponse spring && spring.getStatusCode().is4xxClientError()) return Reply.error(spring.getStatusCode().value(), "Bad request").entity();
+    public void other(Exception e, HttpServletResponse res) {
+        if (e instanceof ErrorResponse spring && spring.getStatusCode().is4xxClientError()) { Reply.error(spring.getStatusCode().value(), "Bad request").writeTo(res); return; }
         System.err.println(e);
         e.printStackTrace();
-        return Reply.error(500, "Something went wrong").entity();
+        Reply.error(500, "Something went wrong").writeTo(res);
     }
 }

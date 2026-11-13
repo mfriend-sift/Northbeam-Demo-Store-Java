@@ -5,7 +5,7 @@ import com.northbeam.store.lib.GatewayEvents;
 import com.northbeam.store.lib.Http;
 import com.northbeam.store.lib.Reply;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.ResponseEntity;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class WebhooksApi {
     // The payment gateway calls this when something happens to a charge, such as a dispute.
     @PostMapping("/webhooks/gateway")
-    public ResponseEntity<byte[]> gateway(HttpServletRequest http) {
-        return Api.run(http, req -> {
+    public void gateway(HttpServletRequest http, HttpServletResponse res) {
+        Api.run(http, res, req -> {
             GatewayEvents.Handled handled = GatewayEvents.handleGatewayEvent(Http.jsonBody(req), req);
             return Reply.json(handled.status(), handled.body());
         });
@@ -22,8 +22,8 @@ public class WebhooksApi {
 
     // The shipping partner calls this when something happens to a shipment.
     @PostMapping("/webhooks/fulfillment")
-    public ResponseEntity<byte[]> fulfillment(HttpServletRequest http) {
-        return Api.run(http, req -> {
+    public void fulfillment(HttpServletRequest http, HttpServletResponse res) {
+        Api.run(http, res, req -> {
             GatewayEvents.Handled handled = GatewayEvents.handleFulfillmentEvent(Http.jsonBody(req), req);
             return Reply.json(handled.status(), handled.body());
         });

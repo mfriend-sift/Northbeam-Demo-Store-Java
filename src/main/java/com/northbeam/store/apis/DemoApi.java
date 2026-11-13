@@ -13,6 +13,7 @@ import com.northbeam.store.lib.Json;
 import com.northbeam.store.lib.Reply;
 import com.northbeam.store.lib.Sessions;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -24,8 +25,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,15 +41,17 @@ public class DemoApi {
 
     // Serves the one scenario module to the Demo drawer (DEMO=1 only: these routes are not present otherwise).
     @GetMapping("/demo/scenarios.js")
-    public ResponseEntity<byte[]> scenarios() throws IOException {
+    public void scenarios(HttpServletResponse res) throws IOException {
         byte[] bytes = Files.readAllBytes(Path.of("contract", "scenarios.js"));
-        return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, "application/javascript; charset=utf-8").contentLength(bytes.length).body(bytes);
+        res.setContentType("application/javascript; charset=utf-8");
+        res.setContentLength(bytes.length);
+        res.getOutputStream().write(bytes);
     }
 
     // Same-origin read of the mock's call log for the Demo drawer (the mock only allows its own CORS origin).
     // The upstream URL is built only from the fixed base plus an integer cursor. Failure is a normal 200 reply.
     @GetMapping("/demo/log")
-    public ResponseEntity<byte[]> log(HttpServletRequest http) {
+    public void log(HttpServletRequest http, HttpServletResponse res) {
         String[] wanted = http.getParameterValues("since");
         double n = wanted != null && wanted.length == 1 ? Js.toNumber(wanted[0]) : Double.NaN;
         double since = !Double.isNaN(n) && Math.floor(n) == n && Math.abs(n) <= 9007199254740991.0 && n >= 0 ? n : 0;
@@ -66,12 +67,12 @@ public class DemoApi {
             if (e instanceof InterruptedException) Thread.currentThread().interrupt();
             reply = Reply.json(200, new JsObject().set("records", new ArrayList<>()).set("nextSeq", since).set("mockUp", false).set("error", "mock unreachable"));
         }
-        return reply.entity();
+        reply.writeTo(res);
     }
 
     // Also resets the mock server-side (its POST /__reset has no browser CORS). Best effort: failure never changes the reply.
     @PostMapping("/demo/reset")
-    public ResponseEntity<byte[]> reset() {
+    public void reset(HttpServletResponse res) {
         Db.sync(() -> { Db.reset(); Sessions.reset(); Mailer.reset(); });
         Boolean mockReset = null;
         String baseUrl = Config.env("SIFT_API_URL");
@@ -85,7 +86,7 @@ public class DemoApi {
                 mockReset = false;
             }
         }
-        return Reply.json(200, new JsObject().set("ok", true).set("mockReset", mockReset)).entity();
+        Reply.json(200, new JsObject().set("ok", true).set("mockReset", mockReset)).writeTo(res);
     }
 
     private static String stripSlashes(String s) {
@@ -96,8 +97,8 @@ public class DemoApi {
 
     // Plays the payment gateway: builds the dispute event and hands it to the webhook handler (no dispute logic here).
     @PostMapping("/demo/dispute")
-    public ResponseEntity<byte[]> dispute(HttpServletRequest http) {
-        return Api.run(http, req -> {
+    public void dispute(HttpServletRequest http, HttpServletResponse res) {
+        Api.run(http, res, req -> {
             JsObject body = Http.jsonBody(req);
             Object orderId = Js.get(body, "orderId");
             Object reason = Js.isUndefined(Js.get(body, "reason")) ? "duplicate" : Js.get(body, "reason");
@@ -120,8 +121,8 @@ public class DemoApi {
 
     // Plays the shipping partner: builds the shipment event and hands it to the fulfillment handler (no status logic here).
     @PostMapping("/demo/orders/{id}/ship")
-    public ResponseEntity<byte[]> ship(HttpServletRequest http, @PathVariable String id) {
-        return Api.run(http, req -> {
+    public void ship(HttpServletRequest http, HttpServletResponse res, @PathVariable String id) {
+        Api.run(http, res, req -> {
             JsObject webhook = new JsObject().set("orderId", id).set("event", "shipment.created");
             // Same function the real webhook route uses: one fulfillment code path.
             GatewayEvents.Handled sent = GatewayEvents.handleFulfillmentEvent(webhook, req);

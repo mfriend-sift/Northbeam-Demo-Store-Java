@@ -21,6 +21,7 @@ public final class Http {
     public static final String RAW_KEY = "nb.rawBody";
     public static final String HAS_BODY_KEY = "nb.hasBody";
     public static final String IS_JSON_KEY = "nb.isJson";
+    public static final String RAW_PATH_KEY = "nb.rawPath";
 
     public static JsObject jsonBody(HttpServletRequest req) { return jsonBody(req, false); }
 
@@ -49,15 +50,21 @@ public final class Http {
     public static void checkParams(HttpServletRequest req) {
         Object pattern = req.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         if (!(pattern instanceof String p) || p.indexOf('{') < 0) return;
-        String target = req.getRequestURI();
-        int q = target.indexOf('?');
-        if (q >= 0) target = target.substring(0, q);
+        String target = rawPath(req);
         String[] segments = p.split("/", -1);
         String[] raw = target.split("/", -1);
         for (int i = 0; i < segments.length && i < raw.length; i++) {
             if (segments[i].indexOf('{') < 0) continue;
             if (!decodesAsUtf8(raw[i])) throw new ApiException(400, "Bad request");
         }
+    }
+
+    /** The request path exactly as the client sent it (before the container's lenient re-spelling of bad escapes, see TomcatTuning). */
+    public static String rawPath(HttpServletRequest req) {
+        Object original = req.getAttribute(RAW_PATH_KEY);
+        String target = original instanceof String s ? s : req.getRequestURI();
+        int q = target.indexOf('?');
+        return q >= 0 ? target.substring(0, q) : target;
     }
 
     private static boolean decodesAsUtf8(String segment) {

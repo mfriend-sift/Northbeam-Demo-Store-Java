@@ -5,7 +5,7 @@ import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.util.pattern.PathPatternParser;
 
-/** Routes match as the other stores' do: any letter case, and no optional trailing slash. */
+/** Routes match as the other stores' do: any letter case, and an optional trailing slash. */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
     @Override
@@ -13,7 +13,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void configurePathMatch(PathMatchConfigurer configurer) {
         PathPatternParser parser = new PathPatternParser();
         parser.setCaseSensitive(false);
-        parser.setMatchOptionalTrailingSeparator(false);
+        parser.setMatchOptionalTrailingSeparator(true);
         configurer.setPatternParser(parser);
     }
 }
