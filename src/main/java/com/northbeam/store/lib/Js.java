@@ -73,6 +73,7 @@ public final class Js {
         if (d == Double.NEGATIVE_INFINITY) return "-Infinity";
         String sign = d < 0 ? "-" : "";
         if (d < 0) d = -d;
+        // Known difference: the smallest subnormal prints here as 4.9E-324 where JS prints 5e-324 (Double.toString keeps two digits); no store value gets near it.
         String r = Double.toString(d); // shortest digits that read back exactly (JDK 19 and later)
         int e = 0;
         int ePos = r.indexOf('E');

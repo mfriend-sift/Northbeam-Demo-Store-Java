@@ -16,6 +16,7 @@ public class ErrorHandlers {
     @ExceptionHandler(Exception.class)
     public void other(Exception e, HttpServletResponse res) {
         if (e instanceof ErrorResponse spring && spring.getStatusCode().is4xxClientError()) { Reply.error(spring.getStatusCode().value(), "Bad request").writeTo(res); return; }
+        if (Reply.isClientGone(e)) return;
         System.err.println(e);
         e.printStackTrace();
         Reply.error(500, "Something went wrong").writeTo(res);

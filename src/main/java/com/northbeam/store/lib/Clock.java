@@ -22,6 +22,9 @@ public final class Clock {
     public static String isoNow() { return iso(System.currentTimeMillis()); }
 
     // A time outside years 0001 to 9999 has no four-digit year: the answer is the error 500, as the reference store's.
+    /** True for a time with a four-digit year: the only X-Demo-Now the store takes. */
+    public static boolean inRange(double ms) { return ms >= MIN_MS && ms <= MAX_MS; }
+
     private static final double MIN_MS = -62135596800000.0, MAX_MS = 253402300799999.0;
 
     private static String iso(double ms) {

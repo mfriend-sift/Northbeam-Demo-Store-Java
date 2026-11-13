@@ -57,6 +57,7 @@ public final class Middleware extends OncePerRequestFilter {
         } catch (ApiException e) {
             if (!response.isCommitted()) Reply.error(e.status, e.getMessage()).writeTo(response);
         } catch (Throwable e) {
+            if (Reply.isClientGone(e)) return;
             System.err.println(e);
             e.printStackTrace();
             if (!response.isCommitted()) { response.reset(); Reply.error(500, "Something went wrong").writeTo(response); }
@@ -82,7 +83,7 @@ public final class Middleware extends OncePerRequestFilter {
         String ip = header(req, "X-Demo-Client-Ip");
         String agent = header(req, "X-Demo-User-Agent");
         double now = Js.toNumber(header(req, "X-Demo-Now"));
-        if (!Double.isNaN(now) && !Double.isInfinite(now) && now > 0) req.setAttribute(Clock.DEMO_NOW_KEY, now);
+        if (!Double.isNaN(now) && !Double.isInfinite(now) && now > 0 && Clock.inRange(now)) req.setAttribute(Clock.DEMO_NOW_KEY, now);
         return new Persona(req, ip == null || ip.isEmpty() ? null : ip, agent == null || agent.isEmpty() ? null : agent);
     }
 

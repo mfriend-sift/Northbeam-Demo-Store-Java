@@ -71,6 +71,7 @@ public class FallbackApi {
         if (semi >= 0) path = path.substring(0, semi);
         try { path = UriUtils.decode(path, StandardCharsets.UTF_8); } catch (IllegalArgumentException e) { return null; }
         if (path.indexOf('\0') >= 0 || path.indexOf('\\') >= 0) return null;
+        for (String segment : path.split("/")) if (segment.startsWith(".")) return null; // a dotfile or folder is never served
         if (path.endsWith("/")) path = path + "index.html";
         Path file = PUBLIC.resolve(path.substring(1)).normalize();
         if (!file.startsWith(PUBLIC) || !Files.isRegularFile(file)) return null;

@@ -24,7 +24,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** Demo-only routes, present only under DEMO=1. The scanner ignores them. */
 @RestController
-@ConditionalOnProperty(name = "DEMO", havingValue = "1")
+@Conditional(DemoOn.class)
 public class DemoApi {
     private static final List<String> REASONS = List.of("duplicate", "fraudulent", "product_not_received", "product_unacceptable", "subscription_canceled", "general");
     private static final List<String> STATUSES = List.of("needs_response", "won", "lost");

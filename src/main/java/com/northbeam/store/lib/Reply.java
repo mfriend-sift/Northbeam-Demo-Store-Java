@@ -24,4 +24,13 @@ public record Reply(int status, String body) {
             res.getOutputStream().write(bytes);
         } catch (IOException e) { throw new UncheckedIOException(e); }
     }
+
+    /** True when the failure is the other end going away (a broken connection): nothing to log and nothing to write. */
+    public static boolean isClientGone(Throwable e) {
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            if (t instanceof IOException || t instanceof UncheckedIOException || t.getClass().getSimpleName().equals("ClientAbortException")) return true;
+            if (t.getCause() == t) break;
+        }
+        return false;
+    }
 }

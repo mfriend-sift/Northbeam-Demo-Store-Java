@@ -4,6 +4,7 @@ import com.northbeam.store.lib.Models.User;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.web.servlet.HandlerMapping;
 
 public final class AccountUpdate {
     private AccountUpdate() {}
@@ -19,9 +20,8 @@ public final class AccountUpdate {
     public static void updateAccount(User user, HttpServletRequest req) {
         String change = "profile";
         List<String> fields = new ArrayList<>();
-        String path = Http.rawPath(req);
-        if (path.regionMatches(true, 0, "/api", 0, 4)) path = path.substring(4); // the path under the /api mount
-        if (path.equals("/account/payment-method")) {
+        // The route the request matched (letter case and a trailing slash already settled), not the path as spelled.
+        if ("/api/account/payment-method".equals(req.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE))) {
             change = req.getMethod().equals("DELETE") ? "payment_method_removed" : "payment_method_saved";
             fields.add("paymentMethod");
         } else {

@@ -1,6 +1,7 @@
 package com.northbeam.store.apis;
 
 import com.northbeam.store.lib.Reply;
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class ErrorApi implements ErrorController {
     @RequestMapping("/error")
     public void error(HttpServletRequest req, HttpServletResponse res) {
+        // Only the container's own error dispatch is an error answer; a plain GET /error is an unknown path.
+        if (req.getDispatcherType() != DispatcherType.ERROR) { Reply.error(404, "Not found").writeTo(res); return; }
         Object code = req.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
         int status = code instanceof Integer i ? i : 500;
         HttpStatus known = HttpStatus.resolve(status);
