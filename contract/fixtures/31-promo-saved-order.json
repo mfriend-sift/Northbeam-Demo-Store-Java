@@ -1,0 +1,269 @@
+{
+  "name": "31-promo-saved-order",
+  "description": "A promo is applied to the cart only, never to a saved order. An order saved without a promo has no promotion or discount; applying a code afterwards (the cart is now empty) is 422 and the order's total does not change, even after a shipping change; there is no route to put a promo on an order (POST /api/orders/{id}/promo is 404). An order saved with a promo keeps its promotion, discount and total after a shipping change and in GET /api/orders, and canceling it leaves them as they were.",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "promo3+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "OrderResponse",
+        "match": {
+          "order": {
+            "total": 89,
+            "promotion": "<absent>",
+            "discount": "<absent>",
+            "status": "saved"
+          }
+        }
+      },
+      "save": {
+        "orderId": "order.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "WELCOME10"
+        }
+      },
+      "expect": {
+        "status": 422,
+        "schema": "Error",
+        "match": {
+          "error": "Add something to your cart to use a promo code"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{orderId}}/promo",
+        "body": {
+          "code": "WELCOME10"
+        }
+      },
+      "expect": {
+        "status": 404,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/orders/{{orderId}}/shipping",
+        "body": {
+          "shippingMethod": "expedited"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "OrderResponse",
+        "match": {
+          "order": {
+            "total": 89,
+            "promotion": "<absent>",
+            "discount": "<absent>"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "WELCOME10"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "promotion": {
+            "code": "WELCOME10"
+          },
+          "discount": 8.9
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "OrderResponse",
+        "match": {
+          "order": {
+            "total": 80.1,
+            "promotion": {
+              "code": "WELCOME10"
+            },
+            "discount": 8.9
+          }
+        }
+      },
+      "save": {
+        "promoOrderId": "order.id"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/orders"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "orders": [
+            "<any>",
+            "<any>"
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/orders/{{promoOrderId}}/shipping",
+        "body": {
+          "shippingMethod": "expedited"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "OrderResponse",
+        "match": {
+          "order": {
+            "total": 80.1,
+            "promotion": {
+              "code": "WELCOME10"
+            },
+            "discount": 8.9
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{promoOrderId}}/cancel",
+        "body": {}
+      },
+      "expect": {
+        "status": 200,
+        "schema": "OrderResponse",
+        "match": {
+          "order": {
+            "status": "canceled",
+            "total": 80.1,
+            "discount": 8.9
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "WELCOME10"
+        }
+      },
+      "expect": {
+        "status": 422,
+        "schema": "Error",
+        "match": {
+          "error": "Add something to your cart to use a promo code"
+        }
+      }
+    }
+  ]
+}

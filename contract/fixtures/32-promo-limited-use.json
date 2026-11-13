@@ -1,0 +1,429 @@
+{
+  "name": "32-promo-limited-use",
+  "description": "A limited-use code (LIMITED25, the first 2 orders in the store) counts a use when an order is made with it, not when it is applied: it can still be applied while only one order has used it (a second shopper applies it and does not order), and after 2 orders it is rejected for the next shopper with 'That promo code has been used up' (422). /demo/reset clears the uses, and a code applied before the reset is gone after it.",
+  "demo": true,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/demo/reset",
+        "body": {}
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "lim1+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "LIMITED25"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "promotion": {
+            "code": "LIMITED25"
+          },
+          "discount": 22.25
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "OrderResponse",
+        "match": {
+          "order": {
+            "total": 66.75,
+            "discount": 22.25,
+            "promotion": {
+              "code": "LIMITED25"
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/logout",
+        "body": {}
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "lim2+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "LIMITED25"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "promotion": {
+            "code": "LIMITED25"
+          },
+          "discount": 22.25
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/logout",
+        "body": {}
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "lim3+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "LIMITED25"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "promotion": {
+            "code": "LIMITED25"
+          },
+          "discount": 22.25
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "OrderResponse",
+        "match": {
+          "order": {
+            "discount": 22.25
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/logout",
+        "body": {}
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "lim4+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "LIMITED25"
+        }
+      },
+      "expect": {
+        "status": 422,
+        "schema": "Error",
+        "match": {
+          "error": "That promo code has been used up"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/demo/reset",
+        "body": {}
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "lim5+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "LIMITED25"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "promotion": {
+            "code": "LIMITED25"
+          },
+          "discount": 22.25
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/demo/reset",
+        "body": {}
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "lim6+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/cart"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "cart": [
+            {
+              "productId": "p1",
+              "qty": 1
+            }
+          ],
+          "promotion": "<absent>",
+          "discount": "<absent>"
+        }
+      }
+    }
+  ]
+}

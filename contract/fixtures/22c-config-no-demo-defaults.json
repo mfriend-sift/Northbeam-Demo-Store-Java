@@ -1,0 +1,21 @@
+{
+  "name": "22c-config-no-demo-defaults",
+  "description": "Without DEMO=1, GET /api/config has no demoDefaults key.",
+  "onlyWithoutDemo": true,
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/config"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "backend": "<string>",
+          "demoDefaults": "<absent>"
+        }
+      }
+    }
+  ]
+}

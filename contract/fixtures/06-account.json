@@ -1,0 +1,74 @@
+{
+  "name": "06-account",
+  "description": "GET and PUT /api/account; PUT normalizes the phone and returns the full public user.",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 401
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "fixture+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user",
+        "match": {
+          "user": {
+            "name": "Fixture Shopper",
+            "email": "fixture+{{runId}}@example.com",
+            "phone": "+14155550199"
+          }
+        }
+      },
+      "save": {
+        "userId": "user.id"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account",
+        "body": {
+          "phone": "(415) 555-0188"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "user": {
+            "id": "{{userId}}",
+            "phone": "+14155550188",
+            "email": "fixture+{{runId}}@example.com"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account",
+        "body": {
+          "email": "not-an-email"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    }
+  ]
+}

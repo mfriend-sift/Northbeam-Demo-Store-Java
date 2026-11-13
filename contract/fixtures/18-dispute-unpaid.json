@@ -1,0 +1,247 @@
+{
+  "name": "18-dispute-unpaid",
+  "description": "DEMO=1: a dispute on an order that was only declined (payment_failed) is refused with 409 {error: This order was never paid}, both through /demo/dispute and straight to /webhooks/gateway, and the order is unchanged. An unknown charge is still 404. After the order is paid, an opened dispute passes, and a closed notice still passes on the order already in chargeback.",
+  "demo": true,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "fixture+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "Order@order"
+      },
+      "save": {
+        "orderId": "order.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{orderId}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_declined",
+            "cardBin": "411111",
+            "cardLast4": "1111"
+          }
+        }
+      },
+      "expect": {
+        "status": 402,
+        "match": {
+          "order": {
+            "status": "payment_failed",
+            "chargeId": "<string>"
+          }
+        }
+      },
+      "save": {
+        "declinedCharge": "order.chargeId"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/demo/dispute",
+        "body": {
+          "orderId": "{{orderId}}",
+          "reason": "duplicate",
+          "status": "needs_response"
+        }
+      },
+      "expect": {
+        "status": 409,
+        "schema": "Error",
+        "match": {
+          "error": "This order was never paid"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/webhooks/gateway",
+        "body": {
+          "type": "charge.dispute.created",
+          "data": {
+            "chargeId": "{{declinedCharge}}",
+            "reason": "duplicate",
+            "status": "needs_response"
+          }
+        }
+      },
+      "expect": {
+        "status": 409,
+        "schema": "Error",
+        "match": {
+          "error": "This order was never paid"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/orders"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "orders": [
+            {
+              "id": "{{orderId}}",
+              "status": "payment_failed",
+              "chargeback": "<absent>"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/webhooks/gateway",
+        "body": {
+          "type": "charge.dispute.created",
+          "data": {
+            "chargeId": "ch_00000",
+            "reason": "duplicate",
+            "status": "needs_response"
+          }
+        }
+      },
+      "expect": {
+        "status": 404,
+        "schema": "Error",
+        "match": {
+          "error": "Unknown charge"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{orderId}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa",
+            "cardBin": "411111",
+            "cardLast4": "1111"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "order": {
+            "status": "paid"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/demo/dispute",
+        "body": {
+          "orderId": "{{orderId}}",
+          "reason": "duplicate",
+          "status": "needs_response"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "ok": true,
+          "webhookStatus": 200
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/demo/dispute",
+        "body": {
+          "orderId": "{{orderId}}",
+          "reason": "duplicate",
+          "status": "lost"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "ok": true,
+          "webhookStatus": 200
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/orders"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "orders": [
+            {
+              "id": "{{orderId}}",
+              "status": "chargeback",
+              "chargeback": {
+                "status": "lost"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

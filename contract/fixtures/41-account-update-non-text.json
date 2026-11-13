@@ -1,0 +1,153 @@
+{
+  "name": "41-account-update-non-text",
+  "description": "PUT /api/account rejects a non-text email (array, object, number), phone (array, number) or name with 400, the same as signup, and changes nothing: an array holding another shopper's address cannot skip the email-taken check. GET /api/account still returns the original text email, phone and name.",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "acct9+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account",
+        "body": {
+          "email": [
+            "avery.alder@example.com"
+          ]
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "email must be text"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account",
+        "body": {
+          "email": {
+            "a": 1
+          }
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "email must be text"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account",
+        "body": {
+          "email": 5
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "email must be text"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account",
+        "body": {
+          "phone": [
+            "415-555-0123"
+          ]
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "phone must be text"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account",
+        "body": {
+          "phone": 4155550123
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "phone must be text"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account",
+        "body": {
+          "name": [
+            "Avery"
+          ]
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account",
+        "body": {
+          "name": 5
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "user": {
+            "email": "acct9+{{runId}}@example.com",
+            "phone": "+14155550199",
+            "name": "Fixture Shopper"
+          }
+        }
+      }
+    }
+  ]
+}

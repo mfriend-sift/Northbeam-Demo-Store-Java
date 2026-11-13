@@ -1,0 +1,138 @@
+{
+  "name": "37-verification-cooldown-expiry",
+  "description": "Resend cooldown and code expiry on the demo clock (X-Demo-Now, DEMO=1). A second start 10 seconds after the first is 429 'Wait before sending a new code' (retryAfterSeconds 20); 31 seconds after it is 200 and replaces the code. A code older than 10 minutes is 400 'That code has expired. Send a new code' and counts as a failure (attempts 1); a new code started then is accepted (123456, 200).",
+  "demo": true,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "ver7+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/start",
+        "headers": {
+          "X-Demo-Now": "4102444800000"
+        },
+        "body": {
+          "channel": "email"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "status": "pending"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/start",
+        "headers": {
+          "X-Demo-Now": "4102444810000"
+        },
+        "body": {
+          "channel": "email"
+        }
+      },
+      "expect": {
+        "status": 429,
+        "schema": "Attempts",
+        "match": {
+          "error": "Wait before sending a new code",
+          "retryAfterSeconds": 20
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/start",
+        "headers": {
+          "X-Demo-Now": "4102444831000"
+        },
+        "body": {
+          "channel": "sms"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "status": "pending",
+          "channel": "sms"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "headers": {
+          "X-Demo-Now": "4102445432000"
+        },
+        "body": {
+          "code": "123456"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Attempts",
+        "match": {
+          "error": "That code has expired. Send a new code",
+          "attempts": 1,
+          "attemptsLeft": 4
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/start",
+        "headers": {
+          "X-Demo-Now": "4102445433000"
+        },
+        "body": {
+          "channel": "sms"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "status": "pending"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "headers": {
+          "X-Demo-Now": "4102445434000"
+        },
+        "body": {
+          "code": "123456"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "status": "success",
+          "verified": true
+        }
+      }
+    }
+  ]
+}

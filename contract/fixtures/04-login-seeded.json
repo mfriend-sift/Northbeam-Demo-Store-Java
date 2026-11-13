@@ -1,0 +1,42 @@
+{
+  "name": "04-login-seeded",
+  "description": "A seeded user signs in with the plain-text seed password, hashed at load by each backend (Plan 1 3.1.7).",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "body": {
+          "email": "avery.alder@example.com",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "user": {
+            "id": "shopper_1001",
+            "email": "avery.alder@example.com"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "Account@user",
+        "match": {
+          "user": {
+            "id": "shopper_1001",
+            "createdAt": "<string>"
+          }
+        }
+      }
+    }
+  ]
+}

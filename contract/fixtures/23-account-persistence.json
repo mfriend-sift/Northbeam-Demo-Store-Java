@@ -1,0 +1,123 @@
+{
+  "name": "23-account-persistence",
+  "description": "An account created by signup lasts until the store stops: logout, then login with the same email and password returns the same user id; a wrong password is 401; after logout the account is 401, after login it shows again, and a second logout and login still returns the same id. (Only /demo/reset or a restart clears created accounts.)",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "persist+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      },
+      "save": {
+        "u1": "user.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/logout"
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 401,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "body": {
+          "email": "persist+{{runId}}@example.com",
+          "password": "wrong"
+        }
+      },
+      "expect": {
+        "status": 401,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "body": {
+          "email": "persist+{{runId}}@example.com",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "UserPublic@user",
+        "match": {
+          "user": {
+            "id": "{{u1}}",
+            "email": "persist+{{runId}}@example.com"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "Account@user",
+        "match": {
+          "user": {
+            "id": "{{u1}}",
+            "name": "Fixture Shopper",
+            "phone": "+14155550199"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/logout"
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "body": {
+          "email": "persist+{{runId}}@example.com",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "user": {
+            "id": "{{u1}}"
+          }
+        }
+      }
+    }
+  ]
+}

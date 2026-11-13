@@ -1,0 +1,81 @@
+{
+  "name": "03-signup",
+  "description": "Signup requires name, email, phone, password; phone becomes E.164; duplicates get 409; sets nb_sid.",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "fixture+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user",
+        "match": {
+          "user": {
+            "name": "Fixture Shopper",
+            "email": "fixture+{{runId}}@example.com",
+            "phone": "+14155550199"
+          }
+        },
+        "cookie": "nb_sid"
+      },
+      "save": {
+        "userId": "user.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "fixture+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 409,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "No Phone",
+          "email": "nophone+{{runId}}@example.com",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Bad Phone",
+          "email": "badphone+{{runId}}@example.com",
+          "phone": "123",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    }
+  ]
+}

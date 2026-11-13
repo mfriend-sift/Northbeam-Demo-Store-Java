@@ -1,0 +1,112 @@
+{
+  "name": "07-cart",
+  "description": "Guests see an empty cart and cannot add; adds accumulate qty.",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/cart"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "cart": []
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1"
+        }
+      },
+      "expect": {
+        "status": 401
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "fixture+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user",
+        "match": {
+          "user": {
+            "name": "Fixture Shopper",
+            "email": "fixture+{{runId}}@example.com",
+            "phone": "+14155550199"
+          }
+        }
+      },
+      "save": {
+        "userId": "user.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "cart": [
+            {
+              "productId": "p1",
+              "qty": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 2
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "cart": [
+            {
+              "productId": "p1",
+              "qty": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "nope"
+        }
+      },
+      "expect": {
+        "status": 404,
+        "schema": "Error"
+      }
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "name": "14-cors-preflight",
+  "description": "DEMO=1: OPTIONS from the engine origin is answered with credentials and the persona headers (freeze item 11).",
+  "demo": true,
+  "steps": [
+    {
+      "request": {
+        "method": "OPTIONS",
+        "path": "/api/signup",
+        "headers": {
+          "Origin": "http://localhost:4010",
+          "Access-Control-Request-Method": "POST",
+          "Access-Control-Request-Headers": "content-type,x-demo-client-ip,x-demo-user-agent,x-demo-now"
+        }
+      },
+      "expect": {
+        "status": 204,
+        "headers": {
+          "access-control-allow-origin": "http://localhost:4010",
+          "access-control-allow-credentials": "true",
+          "access-control-allow-methods": "<contains:POST>",
+          "access-control-allow-headers": "<contains-all:content-type,x-demo-client-ip,x-demo-user-agent,x-demo-now>",
+          "vary": "<contains:Origin>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/products",
+        "headers": {
+          "Origin": "http://localhost:4010"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-origin": "http://localhost:4010",
+          "access-control-allow-credentials": "true"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/products",
+        "headers": {
+          "Origin": "http://evil.example"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-origin": "<absent>"
+        }
+      }
+    }
+  ]
+}

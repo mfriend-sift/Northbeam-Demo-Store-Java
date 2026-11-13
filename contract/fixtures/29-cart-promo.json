@@ -1,0 +1,429 @@
+{
+  "name": "29-cart-promo",
+  "description": "Promo code on the cart. No session is 401 for POST and DELETE /api/cart/promo. A new account's cart has no promotion or discount. A code on an empty cart is 422 (not applicable). WELCOME10 (10 percent) on p1 at 89 is 200 with the cart, promotion {code} and discount 8.9, and GET /api/cart agrees; the code is matched without case or spaces (' welcome10 '); the discount follows the cart (qty 2 gives 17.8); the same code again and a second code while one is applied are both 422 (already applied) and change nothing; DELETE removes it (200, no promotion or discount; 200 again when none); SAVE5 (5 dollars off, cart of 100 or more) gives 5 on the cart of 178 and WELCOME10 can be applied again after a remove. An order made from the cart carries promotion {code} and discount, total is the cart total minus the discount (178 - 5 = 173), and the cart is empty with no promotion afterwards. The promotion carries the code's own terms, in the store's plain words: description, type (percent or amount), value (percent points or dollars) and minimum (dollars, 0 when none), on the cart and on the order.",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "WELCOME10"
+        }
+      },
+      "expect": {
+        "status": 401,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/cart/promo"
+      },
+      "expect": {
+        "status": 401,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "promo1+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/cart"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "cart": [],
+          "promotion": "<absent>",
+          "discount": "<absent>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "WELCOME10"
+        }
+      },
+      "expect": {
+        "status": 422,
+        "schema": "Error",
+        "match": {
+          "error": "Add something to your cart to use a promo code"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "WELCOME10"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "promotion": {
+            "code": "WELCOME10",
+            "description": "10 percent off your order",
+            "type": "percent",
+            "value": 10,
+            "minimum": 0
+          },
+          "discount": 8.9,
+          "cart": [
+            {
+              "productId": "p1",
+              "qty": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/cart"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "promotion": {
+            "code": "WELCOME10",
+            "description": "10 percent off your order",
+            "type": "percent",
+            "value": 10,
+            "minimum": 0
+          },
+          "discount": 8.9
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "WELCOME10"
+        }
+      },
+      "expect": {
+        "status": 422,
+        "schema": "Error",
+        "match": {
+          "error": "That promo code is already applied"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": " welcome10 "
+        }
+      },
+      "expect": {
+        "status": 422,
+        "schema": "Error",
+        "match": {
+          "error": "That promo code is already applied"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "SAVE5"
+        }
+      },
+      "expect": {
+        "status": 422,
+        "schema": "Error",
+        "match": {
+          "error": "A promo code is already applied. Remove it first"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/cart"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "cart": [
+            {
+              "productId": "p1",
+              "qty": 2
+            }
+          ],
+          "promotion": {
+            "code": "WELCOME10",
+            "description": "10 percent off your order",
+            "type": "percent",
+            "value": 10,
+            "minimum": 0
+          },
+          "discount": 17.8
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/cart/promo"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "promotion": "<absent>",
+          "discount": "<absent>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/cart"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "promotion": "<absent>",
+          "discount": "<absent>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/cart/promo"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "cart": [
+            {
+              "productId": "p1",
+              "qty": 2
+            }
+          ],
+          "promotion": "<absent>",
+          "discount": "<absent>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": " welcome10 "
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "promotion": {
+            "code": "WELCOME10",
+            "description": "10 percent off your order",
+            "type": "percent",
+            "value": 10,
+            "minimum": 0
+          },
+          "discount": 17.8
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/cart/promo"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "promotion": "<absent>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "SAVE5"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "promotion": {
+            "code": "SAVE5",
+            "description": "5 dollars off orders of 100 dollars or more",
+            "type": "amount",
+            "value": 5,
+            "minimum": 100
+          },
+          "discount": 5,
+          "cart": [
+            {
+              "productId": "p1",
+              "qty": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "OrderResponse",
+        "match": {
+          "order": {
+            "promotion": {
+              "code": "SAVE5",
+              "description": "5 dollars off orders of 100 dollars or more",
+              "type": "amount",
+              "value": 5,
+              "minimum": 100
+            },
+            "discount": 5,
+            "total": 173,
+            "status": "saved",
+            "items": [
+              {
+                "productId": "p1",
+                "qty": 2
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/cart"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "cart": [],
+          "promotion": "<absent>",
+          "discount": "<absent>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/orders"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "orders": [
+            {
+              "promotion": {
+                "code": "SAVE5",
+                "description": "5 dollars off orders of 100 dollars or more",
+                "type": "amount",
+                "value": 5,
+                "minimum": 100
+              },
+              "discount": 5,
+              "total": 173
+            },
+            "<...>"
+          ]
+        }
+      }
+    }
+  ]
+}

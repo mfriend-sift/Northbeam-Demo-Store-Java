@@ -1,0 +1,164 @@
+{
+  "name": "08-order-save-pay",
+  "description": "POST /api/orders saves the cart as an unpaid order and clears the cart; POST /api/orders/:id/pay with tok_visa pays it; the order appears in GET /api/orders.",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "fixture+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user",
+        "match": {
+          "user": {
+            "name": "Fixture Shopper",
+            "email": "fixture+{{runId}}@example.com",
+            "phone": "+14155550199"
+          }
+        }
+      },
+      "save": {
+        "userId": "user.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "cart": [
+            {
+              "productId": "p1",
+              "qty": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "Order@order",
+        "match": {
+          "order": {
+            "id": "<string>",
+            "status": "saved",
+            "total": 89,
+            "currency": "USD",
+            "shippingMethod": "standard",
+            "items": [
+              {
+                "productId": "p1",
+                "qty": 1
+              }
+            ],
+            "card": "<absent>"
+          }
+        }
+      },
+      "save": {
+        "orderId": "order.id"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/cart"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "cart": []
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{orderId}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa",
+            "cardBin": "411111",
+            "cardLast4": "1111"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "Order@order",
+        "match": {
+          "order": {
+            "id": "{{orderId}}",
+            "status": "paid",
+            "chargeId": "<string>",
+            "card": {
+              "bin": "411111",
+              "last4": "1111"
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/orders"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "orders": [
+            {
+              "id": "{{orderId}}",
+              "status": "paid",
+              "currency": "USD",
+              "chargeId": "<string>",
+              "card": {
+                "bin": "411111",
+                "last4": "1111"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

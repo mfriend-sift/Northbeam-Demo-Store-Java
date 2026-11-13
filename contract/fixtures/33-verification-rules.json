@@ -1,0 +1,446 @@
+{
+  "name": "33-verification-rules",
+  "description": "Account verification, rules that hold with or without DEMO=1. No session is 401 for start and confirm. A new account is verified: false. A text/plain body or a body-less POST is 415; a missing, unknown or non-text channel is 400 (email and sms are the only channels); a missing, blank or non-text code is 400; confirm before any code was started is 409 'No verification is in progress'. Start answers 200 { status: pending, channel } and never contains a code; a second start right away is 429 'Wait before sending a new code' (30 second cooldown, with retryAfterSeconds); a wrong code is 400 with attempts and attemptsLeft counting 1 to 5; after 5 wrong codes the account is locked for 15 minutes: every confirm is 429 (attempts 5, retryAfterSeconds), and so is starting a new code, so a restart does not clear the lockout; a 429 is not counted as another failure. The account stays verified: false, and the notices list has one verification_code notice (the start that was allowed).",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/start",
+        "body": {
+          "channel": "email"
+        }
+      },
+      "expect": {
+        "status": 401,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "body": {
+          "code": "123456"
+        }
+      },
+      "expect": {
+        "status": 401,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "ver1+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "Account@user",
+        "match": {
+          "user": {
+            "verified": false
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/start",
+        "headers": {
+          "Content-Type": "text/plain"
+        },
+        "rawBody": "x"
+      },
+      "expect": {
+        "status": 415,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "headers": {
+          "Content-Type": "text/plain"
+        },
+        "rawBody": "x"
+      },
+      "expect": {
+        "status": 415,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/start"
+      },
+      "expect": {
+        "status": 415,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/start",
+        "body": {}
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "channel must be email or sms"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/start",
+        "body": {
+          "channel": "fax"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "channel must be email or sms"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/start",
+        "body": {
+          "channel": 5
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "channel must be email or sms"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "body": {}
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "code is required"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "body": {
+          "code": "  "
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "code is required"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "body": {
+          "code": 123456
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "code is required"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "body": {
+          "code": "123456"
+        }
+      },
+      "expect": {
+        "status": 409,
+        "schema": "Error",
+        "match": {
+          "error": "No verification is in progress"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/start",
+        "body": {
+          "channel": "email"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "status": "pending",
+          "channel": "email",
+          "code": "<absent>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/start",
+        "body": {
+          "channel": "email"
+        }
+      },
+      "expect": {
+        "status": 429,
+        "schema": "Attempts",
+        "match": {
+          "error": "Wait before sending a new code",
+          "retryAfterSeconds": "<number>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "body": {
+          "code": "000000"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Attempts",
+        "match": {
+          "error": "That code is not correct",
+          "attempts": 1,
+          "attemptsLeft": 4
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "body": {
+          "code": "000000"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Attempts",
+        "match": {
+          "error": "That code is not correct",
+          "attempts": 2,
+          "attemptsLeft": 3
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "body": {
+          "code": "000000"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Attempts",
+        "match": {
+          "error": "That code is not correct",
+          "attempts": 3,
+          "attemptsLeft": 2
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "body": {
+          "code": "000000"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Attempts",
+        "match": {
+          "error": "That code is not correct",
+          "attempts": 4,
+          "attemptsLeft": 1
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "body": {
+          "code": "000000"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Attempts",
+        "match": {
+          "error": "That code is not correct",
+          "attempts": 5,
+          "attemptsLeft": 0
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "body": {
+          "code": "000000"
+        }
+      },
+      "expect": {
+        "status": 429,
+        "schema": "Attempts",
+        "match": {
+          "error": "Too many wrong codes. Try again later",
+          "attempts": 5,
+          "attemptsLeft": 0,
+          "retryAfterSeconds": "<number>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "body": {
+          "code": "123456"
+        }
+      },
+      "expect": {
+        "status": 429,
+        "schema": "Attempts",
+        "match": {
+          "error": "Too many wrong codes. Try again later",
+          "attempts": 5,
+          "attemptsLeft": 0,
+          "retryAfterSeconds": "<number>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/start",
+        "body": {
+          "channel": "sms"
+        }
+      },
+      "expect": {
+        "status": 429,
+        "schema": "Attempts",
+        "match": {
+          "error": "Too many wrong codes. Try again later",
+          "retryAfterSeconds": "<number>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "body": {
+          "code": "123456"
+        }
+      },
+      "expect": {
+        "status": 429,
+        "schema": "Attempts",
+        "match": {
+          "error": "Too many wrong codes. Try again later",
+          "attempts": 5,
+          "attemptsLeft": 0,
+          "retryAfterSeconds": "<number>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "body": {
+          "code": " 000000 "
+        }
+      },
+      "expect": {
+        "status": 429,
+        "schema": "Attempts",
+        "match": {
+          "attempts": 5
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "Account@user",
+        "match": {
+          "user": {
+            "verified": false
+          },
+          "notices": [
+            {
+              "kind": "verification_code",
+              "channel": "email",
+              "to": "ver1+{{runId}}@example.com"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

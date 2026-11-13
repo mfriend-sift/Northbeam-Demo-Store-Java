@@ -1,0 +1,140 @@
+{
+  "name": "26-dispute-canceled-after-paid",
+  "description": "DEMO=1: an order that was paid and then canceled was still paid, so a dispute on it is accepted (200, order becomes chargeback), not refused with 'This order was never paid'. The paid test is one function (wasPaid) shared by /demo/dispute and /webhooks/gateway; a declined order stays refused (fixture 18).",
+  "demo": true,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "fixture+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "Order@order"
+      },
+      "save": {
+        "orderId": "order.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{orderId}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa",
+            "cardBin": "411111",
+            "cardLast4": "1111"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "order": {
+            "status": "paid"
+          }
+        }
+      },
+      "save": {
+        "chargeId": "order.chargeId"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{orderId}}/cancel"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "order": {
+            "status": "canceled"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/demo/dispute",
+        "body": {
+          "orderId": "{{orderId}}",
+          "reason": "fraudulent",
+          "status": "needs_response"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "ok": true,
+          "webhookStatus": 200
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/orders"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "orders": [
+            {
+              "id": "{{orderId}}",
+              "status": "chargeback"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

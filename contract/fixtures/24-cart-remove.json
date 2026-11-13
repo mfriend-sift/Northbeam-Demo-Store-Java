@@ -1,0 +1,294 @@
+{
+  "name": "24-cart-remove",
+  "description": "DELETE /api/cart/items/{productId}. No session is 401 (before the product is looked at). With two lines, removing one answers 200 with the updated cart (the other line untouched); removing it again is 404 'That product is not in your cart', as is an unknown product; GET /api/cart agrees. A removed product can be added again. After a removal the saved order's total covers only the remaining lines (p2 at 129.5 removed, p1 at 89 left); removing the last line empties the cart and POST /api/orders is 400 'Your cart is empty'.",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/cart/items/p1"
+      },
+      "expect": {
+        "status": 401,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "cart+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/cart/items/p1"
+      },
+      "expect": {
+        "status": 404,
+        "schema": "Error",
+        "match": {
+          "error": "That product is not in your cart"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p2",
+          "qty": 2
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "cart": [
+            {
+              "productId": "p1",
+              "qty": 1
+            },
+            {
+              "productId": "p2",
+              "qty": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/cart/items/p1"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "cart": [
+            {
+              "productId": "p2",
+              "qty": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/cart/items/p1"
+      },
+      "expect": {
+        "status": 404,
+        "schema": "Error",
+        "match": {
+          "error": "That product is not in your cart"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/cart/items/p999"
+      },
+      "expect": {
+        "status": 404,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/cart"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "cart": [
+            {
+              "productId": "p2",
+              "qty": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "cart": [
+            {
+              "productId": "p2",
+              "qty": 2
+            },
+            {
+              "productId": "p1",
+              "qty": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/cart/items/p2"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "cart": [
+            {
+              "productId": "p1",
+              "qty": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "Order@order",
+        "match": {
+          "order": {
+            "total": 89,
+            "items": [
+              {
+                "productId": "p1",
+                "qty": 1
+              }
+            ],
+            "status": "saved"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/cart"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "cart": []
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p3",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/cart/items/p3"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "cart": []
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "Your cart is empty"
+        }
+      }
+    }
+  ]
+}

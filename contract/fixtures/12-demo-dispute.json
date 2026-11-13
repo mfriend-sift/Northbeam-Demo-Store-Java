@@ -1,0 +1,208 @@
+{
+  "name": "12-demo-dispute",
+  "description": "DEMO=1: /demo/dispute posts charge.dispute.closed (status lost) to the store's own webhook route.",
+  "demo": true,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "fixture+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user",
+        "match": {
+          "user": {
+            "name": "Fixture Shopper",
+            "email": "fixture+{{runId}}@example.com",
+            "phone": "+14155550199"
+          }
+        }
+      },
+      "save": {
+        "userId": "user.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "cart": [
+            {
+              "productId": "p1",
+              "qty": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "Order@order",
+        "match": {
+          "order": {
+            "id": "<string>",
+            "status": "saved"
+          }
+        }
+      },
+      "save": {
+        "orderId": "order.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{orderId}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa",
+            "cardBin": "411111",
+            "cardLast4": "1111"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "order": {
+            "status": "paid"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/demo/dispute",
+        "body": {
+          "orderId": "{{orderId}}",
+          "reason": "duplicate",
+          "status": "lost"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "ok": true,
+          "webhookStatus": 200,
+          "webhook": {
+            "type": "charge.dispute.closed",
+            "data": {
+              "reason": "duplicate",
+              "status": "lost",
+              "chargeId": "<string>"
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/orders"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "orders": [
+            {
+              "id": "{{orderId}}",
+              "status": "chargeback",
+              "chargeback": {
+                "status": "lost"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/orders/{{orderId}}/shipping",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "1 Ferry Building",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94111"
+          }
+        }
+      },
+      "expect": {
+        "status": 409,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{orderId}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa",
+            "cardBin": "411111",
+            "cardLast4": "1111"
+          }
+        }
+      },
+      "expect": {
+        "status": 409,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/demo/dispute",
+        "body": {
+          "orderId": "ORD-99999"
+        }
+      },
+      "expect": {
+        "status": 404,
+        "schema": "Error"
+      }
+    }
+  ]
+}

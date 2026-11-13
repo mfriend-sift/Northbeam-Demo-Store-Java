@@ -1,0 +1,422 @@
+{
+  "name": "22-account-addresses",
+  "description": "Billing and default shipping addresses on the account. Signup with both (read back on GET /api/account); PUT /api/account changes one and leaves the other; an incomplete address (blank zipcode, missing zipcode) is 400 and the same request's name does not change; the order API still needs its own addresses (POST /api/orders with none is 400, no hidden defaults from the account); signup with an incomplete or non-object address is 400; signup without addresses leaves both keys absent, and PUT can set one alone; the seeded user's one address is both billing and shipping.",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "addr1+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026",
+          "billingAddress": {
+            "name": "Fixture Billing",
+            "address1": "500 Howard St",
+            "city": "Oakland",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94607"
+          },
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "Account@user",
+        "match": {
+          "user": {
+            "billingAddress": {
+              "name": "Fixture Billing",
+              "address1": "500 Howard St",
+              "city": "Oakland",
+              "region": "CA",
+              "country": "US",
+              "zipcode": "94607"
+            },
+            "shippingAddress": {
+              "name": "Fixture Shopper",
+              "address1": "100 Market St",
+              "city": "San Francisco",
+              "region": "CA",
+              "country": "US",
+              "zipcode": "94105"
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "1 Main St",
+            "city": "Portland",
+            "region": "OR",
+            "country": "US",
+            "zipcode": "97201"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "user": {
+            "shippingAddress": {
+              "name": "Fixture Shopper",
+              "address1": "1 Main St",
+              "city": "Portland",
+              "region": "OR",
+              "country": "US",
+              "zipcode": "97201"
+            },
+            "billingAddress": {
+              "name": "Fixture Billing",
+              "address1": "500 Howard St",
+              "city": "Oakland",
+              "region": "CA",
+              "country": "US",
+              "zipcode": "94607"
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "user": {
+            "billingAddress": {
+              "name": "Fixture Billing",
+              "address1": "500 Howard St",
+              "city": "Oakland",
+              "region": "CA",
+              "country": "US",
+              "zipcode": "94607"
+            },
+            "shippingAddress": {
+              "name": "Fixture Shopper",
+              "address1": "1 Main St",
+              "city": "Portland",
+              "region": "OR",
+              "country": "US",
+              "zipcode": "97201"
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account",
+        "body": {
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "1 Main St",
+            "city": "Portland",
+            "region": "OR",
+            "country": "US",
+            "zipcode": "   "
+          }
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account",
+        "body": {
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "1 Main St",
+            "city": "Portland",
+            "region": "OR",
+            "country": "US"
+          }
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account",
+        "body": {
+          "name": "Changed Name",
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "1 Main St",
+            "city": "Portland",
+            "region": "OR",
+            "country": "US",
+            "zipcode": "   "
+          }
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "user": {
+            "name": "Fixture Shopper",
+            "billingAddress": {
+              "name": "Fixture Billing",
+              "address1": "500 Howard St",
+              "city": "Oakland",
+              "region": "CA",
+              "country": "US",
+              "zipcode": "94607"
+            },
+            "shippingAddress": {
+              "name": "Fixture Shopper",
+              "address1": "1 Main St",
+              "city": "Portland",
+              "region": "OR",
+              "country": "US",
+              "zipcode": "97201"
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {}
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/logout"
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "addr2+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026",
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "1 Main St",
+            "city": "Portland",
+            "region": "OR",
+            "country": "US",
+            "zipcode": "   "
+          }
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "addr2+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026",
+          "shippingAddress": "1 Main St"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "addr2+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user",
+        "match": {
+          "user": {
+            "id": "<string>"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "user": {
+            "email": "addr2+{{runId}}@example.com",
+            "billingAddress": "<absent>",
+            "shippingAddress": "<absent>"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account",
+        "body": {
+          "billingAddress": {
+            "name": "Fixture Billing",
+            "address1": "500 Howard St",
+            "city": "Oakland",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94607"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "user": {
+            "billingAddress": {
+              "name": "Fixture Billing",
+              "address1": "500 Howard St",
+              "city": "Oakland",
+              "region": "CA",
+              "country": "US",
+              "zipcode": "94607"
+            },
+            "shippingAddress": "<absent>"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/logout"
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "body": {
+          "email": "avery.alder@example.com",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "user": {
+            "billingAddress": {
+              "name": "Avery Alder",
+              "address1": "100 Market St",
+              "city": "San Francisco",
+              "region": "CA",
+              "country": "US",
+              "zipcode": "94105"
+            },
+            "shippingAddress": {
+              "name": "Avery Alder",
+              "address1": "100 Market St",
+              "city": "San Francisco",
+              "region": "CA",
+              "country": "US",
+              "zipcode": "94105"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

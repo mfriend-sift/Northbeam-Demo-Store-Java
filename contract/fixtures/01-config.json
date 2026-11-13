@@ -1,0 +1,21 @@
+{
+  "name": "01-config",
+  "description": "GET /api/config names the backend, the tree hash (null when started without run.sh), and the store version (default clean).",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/config"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "backend": "<string>",
+          "buildHash": "<sha256|null>",
+          "version": "<string>"
+        }
+      }
+    }
+  ]
+}

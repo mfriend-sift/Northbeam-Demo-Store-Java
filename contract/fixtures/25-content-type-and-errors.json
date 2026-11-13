@@ -1,0 +1,87 @@
+{
+  "name": "25-content-type-and-errors",
+  "description": "Body Content-Type and error shape (Q1, stack traces). A text/plain body is refused with 415 {error: Content-Type must be application/json} (after the 404 and 401 checks, like bad JSON), so a cross-site simple request cannot log in or change a password. A signup with a non-string password or email is 400, and a body over 100 KB is 413 {error: Request body too large}. All are JSON, never an HTML error page.",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "headers": {
+          "Content-Type": "text/plain"
+        },
+        "rawBody": "{\"email\":\"avery.alder@example.com\",\"password\":\"Demo!2026\"}"
+      },
+      "expect": {
+        "status": 415,
+        "schema": "Error",
+        "match": {
+          "error": "Content-Type must be application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "fixture+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": 12345
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": [
+            "a@example.com"
+          ],
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "rawBody": "{\"name\":\"Fixture Shopper\"}",
+        "rawBodyPadTo": 120000
+      },
+      "expect": {
+        "status": 413,
+        "schema": "Error",
+        "match": {
+          "error": "Request body too large"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "body": {
+          "email": "avery.alder@example.com",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "UserPublic@user"
+      }
+    }
+  ]
+}

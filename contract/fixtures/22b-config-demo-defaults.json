@@ -1,0 +1,36 @@
+{
+  "name": "22b-config-demo-defaults",
+  "description": "Under DEMO=1, GET /api/config carries demoDefaults (the seed's _meta.demoDefaults: a phone, an address and a card the forms prefill).",
+  "demo": true,
+  "steps": [
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/config"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "backend": "<string>",
+          "demoDefaults": {
+            "phone": "+12065550142",
+            "address": {
+              "name": "Jordan Reyes",
+              "address1": "2200 Pine Ridge Rd",
+              "city": "Seattle",
+              "region": "WA",
+              "country": "US",
+              "zipcode": "98101"
+            },
+            "paymentMethod": {
+              "token": "tok_demo_visa",
+              "cardBin": "411111",
+              "cardLast4": "1111",
+              "type": "card"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

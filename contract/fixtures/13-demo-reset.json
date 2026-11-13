@@ -1,0 +1,67 @@
+{
+  "name": "13-demo-reset",
+  "description": "DEMO=1: /demo/reset restores the seed and drops sessions.",
+  "demo": true,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "fixture+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user",
+        "match": {
+          "user": {
+            "name": "Fixture Shopper",
+            "email": "fixture+{{runId}}@example.com",
+            "phone": "+14155550199"
+          }
+        }
+      },
+      "save": {
+        "userId": "user.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/demo/reset"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "ok": true
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 401
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "body": {
+          "email": "fixture+{{runId}}@example.com",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 401
+      }
+    }
+  ]
+}

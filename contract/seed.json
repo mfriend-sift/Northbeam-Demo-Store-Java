@@ -1,0 +1,2542 @@
+{
+  "_meta": {
+    "version": 1,
+    "frozen": "2026-10-08 (Plan 3 freeze item 2)",
+    "note": "Dummy data only. Users carry a synthetic plain-text password (Demo!2026); each backend hashes it at load with its own hasher (scrypt, werkzeug.security). Emails use example.com and phones use the 555-01xx fictional range. Dates are absolute, anchored to 2026-10-08T12:00:00Z. New ids continue after the highest seeded id: users shopper_1026, orders ORD-20041, charges ch_50041.",
+    "nextIds": {
+      "user": 1026,
+      "order": 20041,
+      "charge": 50041
+    },
+    "demoDefaults": {
+      "phone": "+12065550142",
+      "address": {
+        "name": "Jordan Reyes",
+        "address1": "2200 Pine Ridge Rd",
+        "city": "Seattle",
+        "region": "WA",
+        "country": "US",
+        "zipcode": "98101"
+      },
+      "paymentMethod": {
+        "token": "tok_demo_visa",
+        "cardBin": "411111",
+        "cardLast4": "1111",
+        "type": "card"
+      }
+    },
+    "scenarioUsers": {
+      "S6": "shopper_1017",
+      "S7": "shopper_1018"
+    }
+  },
+  "promotions": [
+    {
+      "code": "WELCOME10",
+      "description": "10 percent off your order",
+      "type": "percent",
+      "value": 10,
+      "minimum": 0
+    },
+    {
+      "code": "SAVE5",
+      "description": "5 dollars off orders of 100 dollars or more",
+      "type": "amount",
+      "value": 5,
+      "minimum": 100
+    },
+    {
+      "code": "EXPIRED20",
+      "description": "20 percent off (ended 30 September 2026)",
+      "type": "percent",
+      "value": 20,
+      "minimum": 0,
+      "expiresAt": "2026-09-30T23:59:59Z"
+    },
+    {
+      "code": "LIMITED25",
+      "description": "25 percent off, only the first 2 orders in the store",
+      "type": "percent",
+      "value": 25,
+      "minimum": 0,
+      "maxUses": 2
+    }
+  ],
+  "products": [
+    {
+      "id": "p1",
+      "sku": "NB-MS-101",
+      "name": "Merino crew sweater",
+      "price": 89,
+      "brand": "Northbeam",
+      "category": "Apparel",
+      "description": "Midweight 100% merino, naturally odor resistant. Made for cool mornings at camp.",
+      "image": "img/merino-sweater.jpg"
+    },
+    {
+      "id": "p2",
+      "sku": "NB-TR-220",
+      "name": "Trail running shoes",
+      "price": 129.5,
+      "brand": "Northbeam",
+      "category": "Footwear",
+      "description": "Aggressive lugs, rock plate and a roomy toe box for long days on loose ground.",
+      "image": "img/trail-running-shoes.jpg"
+    },
+    {
+      "id": "p3",
+      "sku": "NB-BT-032",
+      "name": "Insulated bottle, 32 oz",
+      "price": 34,
+      "brand": "Northbeam",
+      "category": "Gear",
+      "description": "Double-wall steel keeps drinks cold 24 hours or hot 12. Fits most cup holders.",
+      "image": "img/insulated-bottle.jpg"
+    },
+    {
+      "id": "p4",
+      "sku": "NB-DP-007",
+      "name": "Canvas daypack",
+      "price": 72,
+      "brand": "Northbeam",
+      "category": "Gear",
+      "description": "Waxed canvas, 22 liters, padded laptop sleeve and a bottle pocket on each side.",
+      "image": "img/canvas-daypack.jpg"
+    },
+    {
+      "id": "p5",
+      "sku": "NB-JK-310",
+      "name": "Storm shell jacket",
+      "price": 219,
+      "brand": "Northbeam",
+      "category": "Apparel",
+      "description": "Three-layer waterproof shell with pit zips and a packable hood.",
+      "image": "img/storm-shell-jacket.jpg"
+    },
+    {
+      "id": "p6",
+      "sku": "NB-BN-012",
+      "name": "Wool trail beanie",
+      "price": 28,
+      "brand": "Northbeam",
+      "category": "Apparel",
+      "description": "Soft ribbed wool with a fleece band. One size.",
+      "image": "img/wool-beanie.jpg"
+    }
+  ],
+  "users": [
+    {
+      "id": "shopper_1001",
+      "name": "Avery Alder",
+      "email": "avery.alder@example.com",
+      "phone": "+14155550100",
+      "password": "Demo!2026",
+      "createdAt": "2026-10-06T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Avery Alder",
+        "address1": "100 Market St",
+        "city": "San Francisco",
+        "region": "CA",
+        "country": "US",
+        "zipcode": "94105"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": false
+      }
+    },
+    {
+      "id": "shopper_1002",
+      "name": "Blake Brook",
+      "email": "blake.brook@example.com",
+      "phone": "+14155550101",
+      "password": "Demo!2026",
+      "createdAt": "2026-10-03T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Blake Brook",
+        "address1": "107 Market St",
+        "city": "Portland",
+        "region": "OR",
+        "country": "US",
+        "zipcode": "97205"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": false
+      }
+    },
+    {
+      "id": "shopper_1003",
+      "name": "Casey Cedar",
+      "email": "casey.cedar@example.com",
+      "phone": "+14155550102",
+      "password": "Demo!2026",
+      "createdAt": "2026-09-29T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Casey Cedar",
+        "address1": "114 Market St",
+        "city": "Seattle",
+        "region": "WA",
+        "country": "US",
+        "zipcode": "98101"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": false
+      }
+    },
+    {
+      "id": "shopper_1004",
+      "name": "Devon Dale",
+      "email": "devon.dale@example.com",
+      "phone": "+14155550103",
+      "password": "Demo!2026",
+      "createdAt": "2026-09-24T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Devon Dale",
+        "address1": "121 Market St",
+        "city": "Denver",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80202"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": false
+      }
+    },
+    {
+      "id": "shopper_1005",
+      "name": "Emerson Ember",
+      "email": "emerson.ember@example.com",
+      "phone": "+14155550104",
+      "password": "Demo!2026",
+      "createdAt": "2026-09-17T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Emerson Ember",
+        "address1": "128 Market St",
+        "city": "Austin",
+        "region": "TX",
+        "country": "US",
+        "zipcode": "78701"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": false
+      }
+    },
+    {
+      "id": "shopper_1006",
+      "name": "Finley Fern",
+      "email": "finley.fern@example.com",
+      "phone": "+14155550105",
+      "password": "Demo!2026",
+      "createdAt": "2026-09-08T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Finley Fern",
+        "address1": "135 Market St",
+        "city": "Boston",
+        "region": "MA",
+        "country": "US",
+        "zipcode": "02108"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": false
+      }
+    },
+    {
+      "id": "shopper_1007",
+      "name": "Gray Glenn",
+      "email": "gray.glenn@example.com",
+      "phone": "+14155550106",
+      "password": "Demo!2026",
+      "createdAt": "2026-08-24T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Gray Glenn",
+        "address1": "142 Market St",
+        "city": "Chicago",
+        "region": "IL",
+        "country": "US",
+        "zipcode": "60601"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": false
+      }
+    },
+    {
+      "id": "shopper_1008",
+      "name": "Harper Heath",
+      "email": "harper.heath@example.com",
+      "phone": "+14155550107",
+      "password": "Demo!2026",
+      "createdAt": "2026-08-09T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Harper Heath",
+        "address1": "149 Market St",
+        "city": "Boulder",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80302"
+      },
+      "history": {
+        "priorChargebacks": 1,
+        "goodCustomer": false
+      }
+    },
+    {
+      "id": "shopper_1009",
+      "name": "Indigo Isle",
+      "email": "indigo.isle@example.com",
+      "phone": "+14155550108",
+      "password": "Demo!2026",
+      "createdAt": "2026-07-25T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Indigo Isle",
+        "address1": "156 Market St",
+        "city": "Salt Lake City",
+        "region": "UT",
+        "country": "US",
+        "zipcode": "84101"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": false
+      }
+    },
+    {
+      "id": "shopper_1010",
+      "name": "Jordan Juniper",
+      "email": "jordan.juniper@example.com",
+      "phone": "+14155550109",
+      "password": "Demo!2026",
+      "createdAt": "2026-07-10T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Jordan Juniper",
+        "address1": "163 Market St",
+        "city": "Minneapolis",
+        "region": "MN",
+        "country": "US",
+        "zipcode": "55401"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": false
+      }
+    },
+    {
+      "id": "shopper_1011",
+      "name": "Kai Knoll",
+      "email": "kai.knoll@example.com",
+      "phone": "+14155550110",
+      "password": "Demo!2026",
+      "createdAt": "2026-06-10T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Kai Knoll",
+        "address1": "170 Market St",
+        "city": "San Francisco",
+        "region": "CA",
+        "country": "US",
+        "zipcode": "94105"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": false
+      }
+    },
+    {
+      "id": "shopper_1012",
+      "name": "Logan Linden",
+      "email": "logan.linden@example.com",
+      "phone": "+14155550111",
+      "password": "Demo!2026",
+      "createdAt": "2026-05-11T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Logan Linden",
+        "address1": "177 Market St",
+        "city": "Portland",
+        "region": "OR",
+        "country": "US",
+        "zipcode": "97205"
+      },
+      "history": {
+        "priorChargebacks": 1,
+        "goodCustomer": false
+      }
+    },
+    {
+      "id": "shopper_1013",
+      "name": "Morgan Marsh",
+      "email": "morgan.marsh@example.com",
+      "phone": "+14155550112",
+      "password": "Demo!2026",
+      "createdAt": "2026-04-11T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Morgan Marsh",
+        "address1": "184 Market St",
+        "city": "Seattle",
+        "region": "WA",
+        "country": "US",
+        "zipcode": "98101"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": false
+      }
+    },
+    {
+      "id": "shopper_1014",
+      "name": "Noel North",
+      "email": "noel.north@example.com",
+      "phone": "+14155550113",
+      "password": "Demo!2026",
+      "createdAt": "2026-02-10T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Noel North",
+        "address1": "191 Market St",
+        "city": "Denver",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80202"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": false
+      }
+    },
+    {
+      "id": "shopper_1015",
+      "name": "Oakley Orchard",
+      "email": "oakley.orchard@example.com",
+      "phone": "+14155550114",
+      "password": "Demo!2026",
+      "createdAt": "2025-12-12T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Oakley Orchard",
+        "address1": "198 Market St",
+        "city": "Austin",
+        "region": "TX",
+        "country": "US",
+        "zipcode": "78701"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": false
+      }
+    },
+    {
+      "id": "shopper_1016",
+      "name": "Parker Pine",
+      "email": "parker.pine@example.com",
+      "phone": "+14155550115",
+      "password": "Demo!2026",
+      "createdAt": "2025-10-08T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Parker Pine",
+        "address1": "205 Market St",
+        "city": "Boston",
+        "region": "MA",
+        "country": "US",
+        "zipcode": "02108"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": false
+      }
+    },
+    {
+      "id": "shopper_1017",
+      "name": "Quinn Quarry",
+      "email": "quinn.quarry@example.com",
+      "phone": "+14155550116",
+      "password": "Demo!2026",
+      "createdAt": "2025-09-03T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Quinn Quarry",
+        "address1": "212 Market St",
+        "city": "Chicago",
+        "region": "IL",
+        "country": "US",
+        "zipcode": "60601"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": false
+      },
+      "scenario": "S6"
+    },
+    {
+      "id": "shopper_1018",
+      "name": "Reese Ridge",
+      "email": "reese.ridge@example.com",
+      "phone": "+14155550117",
+      "password": "Demo!2026",
+      "createdAt": "2025-07-15T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Reese Ridge",
+        "address1": "219 Market St",
+        "city": "Boulder",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80302"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": false
+      },
+      "scenario": "S7"
+    },
+    {
+      "id": "shopper_1019",
+      "name": "Sage Stone",
+      "email": "sage.stone@example.com",
+      "phone": "+14155550118",
+      "password": "Demo!2026",
+      "createdAt": "2025-05-26T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Sage Stone",
+        "address1": "226 Market St",
+        "city": "Salt Lake City",
+        "region": "UT",
+        "country": "US",
+        "zipcode": "84101"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": false
+      }
+    },
+    {
+      "id": "shopper_1020",
+      "name": "Taylor Thorne",
+      "email": "taylor.thorne@example.com",
+      "phone": "+14155550119",
+      "password": "Demo!2026",
+      "createdAt": "2025-02-15T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Taylor Thorne",
+        "address1": "233 Market St",
+        "city": "Minneapolis",
+        "region": "MN",
+        "country": "US",
+        "zipcode": "55401"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": false
+      }
+    },
+    {
+      "id": "shopper_1021",
+      "name": "Umi Upton",
+      "email": "umi.upton@example.com",
+      "phone": "+14155550120",
+      "password": "Demo!2026",
+      "createdAt": "2024-11-07T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Umi Upton",
+        "address1": "240 Market St",
+        "city": "San Francisco",
+        "region": "CA",
+        "country": "US",
+        "zipcode": "94105"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": false
+      }
+    },
+    {
+      "id": "shopper_1022",
+      "name": "Val Vale",
+      "email": "val.vale@example.com",
+      "phone": "+14155550121",
+      "password": "Demo!2026",
+      "createdAt": "2024-07-30T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Val Vale",
+        "address1": "247 Market St",
+        "city": "Portland",
+        "region": "OR",
+        "country": "US",
+        "zipcode": "97205"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": false
+      }
+    },
+    {
+      "id": "shopper_1023",
+      "name": "Wren Willow",
+      "email": "wren.willow@example.com",
+      "phone": "+14155550122",
+      "password": "Demo!2026",
+      "createdAt": "2024-04-21T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Wren Willow",
+        "address1": "254 Market St",
+        "city": "Seattle",
+        "region": "WA",
+        "country": "US",
+        "zipcode": "98101"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": true
+      }
+    },
+    {
+      "id": "shopper_1024",
+      "name": "Yael Yarrow",
+      "email": "yael.yarrow@example.com",
+      "phone": "+14155550123",
+      "password": "Demo!2026",
+      "createdAt": "2024-01-12T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Yael Yarrow",
+        "address1": "261 Market St",
+        "city": "Denver",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80202"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": true
+      }
+    },
+    {
+      "id": "shopper_1025",
+      "name": "Zion Zephyr",
+      "email": "zion.zephyr@example.com",
+      "phone": "+14155550124",
+      "password": "Demo!2026",
+      "createdAt": "2023-10-09T12:00:00Z",
+      "status": "active",
+      "address": {
+        "name": "Zion Zephyr",
+        "address1": "268 Market St",
+        "city": "Austin",
+        "region": "TX",
+        "country": "US",
+        "zipcode": "78701"
+      },
+      "history": {
+        "priorChargebacks": 0,
+        "goodCustomer": true
+      }
+    }
+  ],
+  "orders": [
+    {
+      "id": "ORD-20001",
+      "userId": "shopper_1017",
+      "items": [
+        {
+          "productId": "p1",
+          "sku": "NB-MS-101",
+          "name": "Merino crew sweater",
+          "price": 89,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        }
+      ],
+      "total": 89,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Quinn Quarry",
+        "address1": "212 Market St",
+        "city": "Chicago",
+        "region": "IL",
+        "country": "US",
+        "zipcode": "60601"
+      },
+      "billingAddress": {
+        "name": "Quinn Quarry",
+        "address1": "212 Market St",
+        "city": "Chicago",
+        "region": "IL",
+        "country": "US",
+        "zipcode": "60601"
+      },
+      "card": {
+        "bin": "411111",
+        "last4": "1111"
+      },
+      "status": "paid",
+      "chargeId": "ch_50001",
+      "sessionId": "sess_seed0001",
+      "createdAt": "2026-08-19T12:00:00Z"
+    },
+    {
+      "id": "ORD-20002",
+      "userId": "shopper_1018",
+      "items": [
+        {
+          "productId": "p2",
+          "sku": "NB-TR-220",
+          "name": "Trail running shoes",
+          "price": 129.5,
+          "brand": "Northbeam",
+          "category": "Footwear",
+          "qty": 2
+        },
+        {
+          "productId": "p5",
+          "sku": "NB-JK-310",
+          "name": "Storm shell jacket",
+          "price": 219,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        }
+      ],
+      "total": 478,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Reese Ridge",
+        "address1": "219 Market St",
+        "city": "Boulder",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80302"
+      },
+      "billingAddress": {
+        "name": "Reese Ridge",
+        "address1": "219 Market St",
+        "city": "Boulder",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80302"
+      },
+      "card": {
+        "bin": "555555",
+        "last4": "4444"
+      },
+      "status": "paid",
+      "chargeId": "ch_50002",
+      "sessionId": "sess_seed0002",
+      "createdAt": "2026-06-18T12:00:00Z"
+    },
+    {
+      "id": "ORD-20003",
+      "userId": "shopper_1003",
+      "items": [
+        {
+          "productId": "p3",
+          "sku": "NB-BT-032",
+          "name": "Insulated bottle, 32 oz",
+          "price": 34,
+          "brand": "Northbeam",
+          "category": "Gear",
+          "qty": 1
+        },
+        {
+          "productId": "p2",
+          "sku": "NB-TR-220",
+          "name": "Trail running shoes",
+          "price": 129.5,
+          "brand": "Northbeam",
+          "category": "Footwear",
+          "qty": 1
+        }
+      ],
+      "total": 163.5,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Casey Cedar",
+        "address1": "114 Market St",
+        "city": "Seattle",
+        "region": "WA",
+        "country": "US",
+        "zipcode": "98101"
+      },
+      "billingAddress": {
+        "name": "Casey Cedar",
+        "address1": "114 Market St",
+        "city": "Seattle",
+        "region": "WA",
+        "country": "US",
+        "zipcode": "98101"
+      },
+      "card": {
+        "bin": "378282",
+        "last4": "0005"
+      },
+      "status": "paid",
+      "chargeId": "ch_50003",
+      "sessionId": "sess_seed0003",
+      "createdAt": "2026-10-05T12:00:00Z"
+    },
+    {
+      "id": "ORD-20004",
+      "userId": "shopper_1004",
+      "items": [
+        {
+          "productId": "p4",
+          "sku": "NB-DP-007",
+          "name": "Canvas daypack",
+          "price": 72,
+          "brand": "Northbeam",
+          "category": "Gear",
+          "qty": 1
+        }
+      ],
+      "total": 72,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Devon Dale",
+        "address1": "121 Market St",
+        "city": "Denver",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80202"
+      },
+      "billingAddress": {
+        "name": "Devon Dale",
+        "address1": "121 Market St",
+        "city": "Denver",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80202"
+      },
+      "card": {
+        "bin": "601111",
+        "last4": "1117"
+      },
+      "status": "paid",
+      "chargeId": "ch_50004",
+      "sessionId": "sess_seed0004",
+      "createdAt": "2026-10-01T12:00:00Z"
+    },
+    {
+      "id": "ORD-20005",
+      "userId": "shopper_1005",
+      "items": [
+        {
+          "productId": "p5",
+          "sku": "NB-JK-310",
+          "name": "Storm shell jacket",
+          "price": 219,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        },
+        {
+          "productId": "p2",
+          "sku": "NB-TR-220",
+          "name": "Trail running shoes",
+          "price": 129.5,
+          "brand": "Northbeam",
+          "category": "Footwear",
+          "qty": 1
+        }
+      ],
+      "total": 348.5,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Emerson Ember",
+        "address1": "128 Market St",
+        "city": "Austin",
+        "region": "TX",
+        "country": "US",
+        "zipcode": "78701"
+      },
+      "billingAddress": {
+        "name": "Emerson Ember",
+        "address1": "128 Market St",
+        "city": "Austin",
+        "region": "TX",
+        "country": "US",
+        "zipcode": "78701"
+      },
+      "card": {
+        "bin": "400000",
+        "last4": "0077"
+      },
+      "status": "paid",
+      "chargeId": "ch_50005",
+      "sessionId": "sess_seed0005",
+      "createdAt": "2026-09-25T12:00:00Z"
+    },
+    {
+      "id": "ORD-20006",
+      "userId": "shopper_1006",
+      "items": [
+        {
+          "productId": "p6",
+          "sku": "NB-BN-012",
+          "name": "Wool trail beanie",
+          "price": 28,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 2
+        },
+        {
+          "productId": "p5",
+          "sku": "NB-JK-310",
+          "name": "Storm shell jacket",
+          "price": 219,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        }
+      ],
+      "total": 275,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Finley Fern",
+        "address1": "135 Market St",
+        "city": "Boston",
+        "region": "MA",
+        "country": "US",
+        "zipcode": "02108"
+      },
+      "billingAddress": {
+        "name": "Finley Fern",
+        "address1": "135 Market St",
+        "city": "Boston",
+        "region": "MA",
+        "country": "US",
+        "zipcode": "02108"
+      },
+      "card": {
+        "bin": "411111",
+        "last4": "1111"
+      },
+      "status": "paid",
+      "chargeId": "ch_50006",
+      "sessionId": "sess_seed0006",
+      "createdAt": "2026-09-16T12:00:00Z"
+    },
+    {
+      "id": "ORD-20007",
+      "userId": "shopper_1007",
+      "items": [
+        {
+          "productId": "p1",
+          "sku": "NB-MS-101",
+          "name": "Merino crew sweater",
+          "price": 89,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        }
+      ],
+      "total": 89,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Gray Glenn",
+        "address1": "142 Market St",
+        "city": "Chicago",
+        "region": "IL",
+        "country": "US",
+        "zipcode": "60601"
+      },
+      "billingAddress": {
+        "name": "Gray Glenn",
+        "address1": "142 Market St",
+        "city": "Chicago",
+        "region": "IL",
+        "country": "US",
+        "zipcode": "60601"
+      },
+      "card": {
+        "bin": "555555",
+        "last4": "4444"
+      },
+      "status": "paid",
+      "chargeId": "ch_50007",
+      "sessionId": "sess_seed0007",
+      "createdAt": "2026-08-30T12:00:00Z"
+    },
+    {
+      "id": "ORD-20008",
+      "userId": "shopper_1008",
+      "items": [
+        {
+          "productId": "p2",
+          "sku": "NB-TR-220",
+          "name": "Trail running shoes",
+          "price": 129.5,
+          "brand": "Northbeam",
+          "category": "Footwear",
+          "qty": 2
+        },
+        {
+          "productId": "p5",
+          "sku": "NB-JK-310",
+          "name": "Storm shell jacket",
+          "price": 219,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        }
+      ],
+      "total": 478,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Harper Heath",
+        "address1": "149 Market St",
+        "city": "Boulder",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80302"
+      },
+      "billingAddress": {
+        "name": "Harper Heath",
+        "address1": "149 Market St",
+        "city": "Boulder",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80302"
+      },
+      "card": {
+        "bin": "378282",
+        "last4": "0005"
+      },
+      "status": "chargeback",
+      "chargeId": "ch_50008",
+      "sessionId": "sess_seed0008",
+      "createdAt": "2026-10-01T12:00:00Z",
+      "chargeback": {
+        "reason": "duplicate",
+        "status": "lost",
+        "receivedAt": "2026-10-07T12:00:00Z"
+      }
+    },
+    {
+      "id": "ORD-20009",
+      "userId": "shopper_1009",
+      "items": [
+        {
+          "productId": "p3",
+          "sku": "NB-BT-032",
+          "name": "Insulated bottle, 32 oz",
+          "price": 34,
+          "brand": "Northbeam",
+          "category": "Gear",
+          "qty": 1
+        },
+        {
+          "productId": "p2",
+          "sku": "NB-TR-220",
+          "name": "Trail running shoes",
+          "price": 129.5,
+          "brand": "Northbeam",
+          "category": "Footwear",
+          "qty": 1
+        }
+      ],
+      "total": 163.5,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Indigo Isle",
+        "address1": "156 Market St",
+        "city": "Salt Lake City",
+        "region": "UT",
+        "country": "US",
+        "zipcode": "84101"
+      },
+      "billingAddress": {
+        "name": "Indigo Isle",
+        "address1": "156 Market St",
+        "city": "Salt Lake City",
+        "region": "UT",
+        "country": "US",
+        "zipcode": "84101"
+      },
+      "card": {
+        "bin": "601111",
+        "last4": "1117"
+      },
+      "status": "paid",
+      "chargeId": "ch_50009",
+      "sessionId": "sess_seed0009",
+      "createdAt": "2026-09-20T12:00:00Z"
+    },
+    {
+      "id": "ORD-20010",
+      "userId": "shopper_1010",
+      "items": [
+        {
+          "productId": "p4",
+          "sku": "NB-DP-007",
+          "name": "Canvas daypack",
+          "price": 72,
+          "brand": "Northbeam",
+          "category": "Gear",
+          "qty": 1
+        }
+      ],
+      "total": 72,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Jordan Juniper",
+        "address1": "163 Market St",
+        "city": "Minneapolis",
+        "region": "MN",
+        "country": "US",
+        "zipcode": "55401"
+      },
+      "billingAddress": {
+        "name": "Jordan Juniper",
+        "address1": "163 Market St",
+        "city": "Minneapolis",
+        "region": "MN",
+        "country": "US",
+        "zipcode": "55401"
+      },
+      "card": {
+        "bin": "400000",
+        "last4": "0077"
+      },
+      "status": "paid",
+      "chargeId": "ch_50010",
+      "sessionId": "sess_seed0010",
+      "createdAt": "2026-09-05T12:00:00Z"
+    },
+    {
+      "id": "ORD-20011",
+      "userId": "shopper_1011",
+      "items": [
+        {
+          "productId": "p5",
+          "sku": "NB-JK-310",
+          "name": "Storm shell jacket",
+          "price": 219,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        },
+        {
+          "productId": "p2",
+          "sku": "NB-TR-220",
+          "name": "Trail running shoes",
+          "price": 129.5,
+          "brand": "Northbeam",
+          "category": "Footwear",
+          "qty": 1
+        }
+      ],
+      "total": 348.5,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Kai Knoll",
+        "address1": "170 Market St",
+        "city": "San Francisco",
+        "region": "CA",
+        "country": "US",
+        "zipcode": "94105"
+      },
+      "billingAddress": {
+        "name": "Kai Knoll",
+        "address1": "170 Market St",
+        "city": "San Francisco",
+        "region": "CA",
+        "country": "US",
+        "zipcode": "94105"
+      },
+      "card": {
+        "bin": "411111",
+        "last4": "1111"
+      },
+      "status": "paid",
+      "chargeId": "ch_50011",
+      "sessionId": "sess_seed0011",
+      "createdAt": "2026-08-09T12:00:00Z"
+    },
+    {
+      "id": "ORD-20012",
+      "userId": "shopper_1012",
+      "items": [
+        {
+          "productId": "p6",
+          "sku": "NB-BN-012",
+          "name": "Wool trail beanie",
+          "price": 28,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 2
+        },
+        {
+          "productId": "p5",
+          "sku": "NB-JK-310",
+          "name": "Storm shell jacket",
+          "price": 219,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        }
+      ],
+      "total": 275,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Logan Linden",
+        "address1": "177 Market St",
+        "city": "Portland",
+        "region": "OR",
+        "country": "US",
+        "zipcode": "97205"
+      },
+      "billingAddress": {
+        "name": "Logan Linden",
+        "address1": "177 Market St",
+        "city": "Portland",
+        "region": "OR",
+        "country": "US",
+        "zipcode": "97205"
+      },
+      "card": {
+        "bin": "555555",
+        "last4": "4444"
+      },
+      "status": "chargeback",
+      "chargeId": "ch_50012",
+      "sessionId": "sess_seed0012",
+      "createdAt": "2026-07-07T12:00:00Z",
+      "chargeback": {
+        "reason": "duplicate",
+        "status": "lost",
+        "receivedAt": "2026-07-27T12:00:00Z"
+      }
+    },
+    {
+      "id": "ORD-20013",
+      "userId": "shopper_1013",
+      "items": [
+        {
+          "productId": "p1",
+          "sku": "NB-MS-101",
+          "name": "Merino crew sweater",
+          "price": 89,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        }
+      ],
+      "total": 89,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Morgan Marsh",
+        "address1": "184 Market St",
+        "city": "Seattle",
+        "region": "WA",
+        "country": "US",
+        "zipcode": "98101"
+      },
+      "billingAddress": {
+        "name": "Morgan Marsh",
+        "address1": "184 Market St",
+        "city": "Seattle",
+        "region": "WA",
+        "country": "US",
+        "zipcode": "98101"
+      },
+      "card": {
+        "bin": "378282",
+        "last4": "0005"
+      },
+      "status": "paid",
+      "chargeId": "ch_50013",
+      "sessionId": "sess_seed0013",
+      "createdAt": "2026-05-26T12:00:00Z"
+    },
+    {
+      "id": "ORD-20014",
+      "userId": "shopper_1014",
+      "items": [
+        {
+          "productId": "p2",
+          "sku": "NB-TR-220",
+          "name": "Trail running shoes",
+          "price": 129.5,
+          "brand": "Northbeam",
+          "category": "Footwear",
+          "qty": 2
+        },
+        {
+          "productId": "p5",
+          "sku": "NB-JK-310",
+          "name": "Storm shell jacket",
+          "price": 219,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        }
+      ],
+      "total": 478,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Noel North",
+        "address1": "191 Market St",
+        "city": "Denver",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80202"
+      },
+      "billingAddress": {
+        "name": "Noel North",
+        "address1": "191 Market St",
+        "city": "Denver",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80202"
+      },
+      "card": {
+        "bin": "601111",
+        "last4": "1117"
+      },
+      "status": "paid",
+      "chargeId": "ch_50014",
+      "sessionId": "sess_seed0014",
+      "createdAt": "2026-03-12T12:00:00Z"
+    },
+    {
+      "id": "ORD-20015",
+      "userId": "shopper_1015",
+      "items": [
+        {
+          "productId": "p3",
+          "sku": "NB-BT-032",
+          "name": "Insulated bottle, 32 oz",
+          "price": 34,
+          "brand": "Northbeam",
+          "category": "Gear",
+          "qty": 1
+        },
+        {
+          "productId": "p2",
+          "sku": "NB-TR-220",
+          "name": "Trail running shoes",
+          "price": 129.5,
+          "brand": "Northbeam",
+          "category": "Footwear",
+          "qty": 1
+        }
+      ],
+      "total": 163.5,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Oakley Orchard",
+        "address1": "198 Market St",
+        "city": "Austin",
+        "region": "TX",
+        "country": "US",
+        "zipcode": "78701"
+      },
+      "billingAddress": {
+        "name": "Oakley Orchard",
+        "address1": "198 Market St",
+        "city": "Austin",
+        "region": "TX",
+        "country": "US",
+        "zipcode": "78701"
+      },
+      "card": {
+        "bin": "400000",
+        "last4": "0077"
+      },
+      "status": "paid",
+      "chargeId": "ch_50015",
+      "sessionId": "sess_seed0015",
+      "createdAt": "2026-09-01T12:00:00Z"
+    },
+    {
+      "id": "ORD-20016",
+      "userId": "shopper_1016",
+      "items": [
+        {
+          "productId": "p4",
+          "sku": "NB-DP-007",
+          "name": "Canvas daypack",
+          "price": 72,
+          "brand": "Northbeam",
+          "category": "Gear",
+          "qty": 1
+        }
+      ],
+      "total": 72,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Parker Pine",
+        "address1": "205 Market St",
+        "city": "Boston",
+        "region": "MA",
+        "country": "US",
+        "zipcode": "02108"
+      },
+      "billingAddress": {
+        "name": "Parker Pine",
+        "address1": "205 Market St",
+        "city": "Boston",
+        "region": "MA",
+        "country": "US",
+        "zipcode": "02108"
+      },
+      "card": {
+        "bin": "411111",
+        "last4": "1111"
+      },
+      "status": "paid",
+      "chargeId": "ch_50016",
+      "sessionId": "sess_seed0016",
+      "createdAt": "2026-07-09T12:00:00Z"
+    },
+    {
+      "id": "ORD-20017",
+      "userId": "shopper_1019",
+      "items": [
+        {
+          "productId": "p5",
+          "sku": "NB-JK-310",
+          "name": "Storm shell jacket",
+          "price": 219,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        },
+        {
+          "productId": "p2",
+          "sku": "NB-TR-220",
+          "name": "Trail running shoes",
+          "price": 129.5,
+          "brand": "Northbeam",
+          "category": "Footwear",
+          "qty": 1
+        }
+      ],
+      "total": 348.5,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Sage Stone",
+        "address1": "226 Market St",
+        "city": "Salt Lake City",
+        "region": "UT",
+        "country": "US",
+        "zipcode": "84101"
+      },
+      "billingAddress": {
+        "name": "Sage Stone",
+        "address1": "226 Market St",
+        "city": "Salt Lake City",
+        "region": "UT",
+        "country": "US",
+        "zipcode": "84101"
+      },
+      "card": {
+        "bin": "555555",
+        "last4": "4444"
+      },
+      "status": "paid",
+      "chargeId": "ch_50017",
+      "sessionId": "sess_seed0017",
+      "createdAt": "2026-04-04T12:00:00Z"
+    },
+    {
+      "id": "ORD-20018",
+      "userId": "shopper_1020",
+      "items": [
+        {
+          "productId": "p6",
+          "sku": "NB-BN-012",
+          "name": "Wool trail beanie",
+          "price": 28,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 2
+        },
+        {
+          "productId": "p5",
+          "sku": "NB-JK-310",
+          "name": "Storm shell jacket",
+          "price": 219,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        }
+      ],
+      "total": 275,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Taylor Thorne",
+        "address1": "233 Market St",
+        "city": "Minneapolis",
+        "region": "MN",
+        "country": "US",
+        "zipcode": "55401"
+      },
+      "billingAddress": {
+        "name": "Taylor Thorne",
+        "address1": "233 Market St",
+        "city": "Minneapolis",
+        "region": "MN",
+        "country": "US",
+        "zipcode": "55401"
+      },
+      "card": {
+        "bin": "378282",
+        "last4": "0005"
+      },
+      "status": "paid",
+      "chargeId": "ch_50018",
+      "sessionId": "sess_seed0018",
+      "createdAt": "2025-12-12T12:00:00Z"
+    },
+    {
+      "id": "ORD-20019",
+      "userId": "shopper_1021",
+      "items": [
+        {
+          "productId": "p1",
+          "sku": "NB-MS-101",
+          "name": "Merino crew sweater",
+          "price": 89,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        }
+      ],
+      "total": 89,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Umi Upton",
+        "address1": "240 Market St",
+        "city": "San Francisco",
+        "region": "CA",
+        "country": "US",
+        "zipcode": "94105"
+      },
+      "billingAddress": {
+        "name": "Umi Upton",
+        "address1": "240 Market St",
+        "city": "San Francisco",
+        "region": "CA",
+        "country": "US",
+        "zipcode": "94105"
+      },
+      "card": {
+        "bin": "601111",
+        "last4": "1117"
+      },
+      "status": "paid",
+      "chargeId": "ch_50019",
+      "sessionId": "sess_seed0019",
+      "createdAt": "2025-07-28T12:00:00Z"
+    },
+    {
+      "id": "ORD-20020",
+      "userId": "shopper_1022",
+      "items": [
+        {
+          "productId": "p2",
+          "sku": "NB-TR-220",
+          "name": "Trail running shoes",
+          "price": 129.5,
+          "brand": "Northbeam",
+          "category": "Footwear",
+          "qty": 2
+        },
+        {
+          "productId": "p5",
+          "sku": "NB-JK-310",
+          "name": "Storm shell jacket",
+          "price": 219,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        }
+      ],
+      "total": 478,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Val Vale",
+        "address1": "247 Market St",
+        "city": "Portland",
+        "region": "OR",
+        "country": "US",
+        "zipcode": "97205"
+      },
+      "billingAddress": {
+        "name": "Val Vale",
+        "address1": "247 Market St",
+        "city": "Portland",
+        "region": "OR",
+        "country": "US",
+        "zipcode": "97205"
+      },
+      "card": {
+        "bin": "400000",
+        "last4": "0077"
+      },
+      "status": "paid",
+      "chargeId": "ch_50020",
+      "sessionId": "sess_seed0020",
+      "createdAt": "2025-02-15T12:00:00Z"
+    },
+    {
+      "id": "ORD-20021",
+      "userId": "shopper_1023",
+      "items": [
+        {
+          "productId": "p3",
+          "sku": "NB-BT-032",
+          "name": "Insulated bottle, 32 oz",
+          "price": 34,
+          "brand": "Northbeam",
+          "category": "Gear",
+          "qty": 1
+        },
+        {
+          "productId": "p2",
+          "sku": "NB-TR-220",
+          "name": "Trail running shoes",
+          "price": 129.5,
+          "brand": "Northbeam",
+          "category": "Footwear",
+          "qty": 1
+        }
+      ],
+      "total": 163.5,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Wren Willow",
+        "address1": "254 Market St",
+        "city": "Seattle",
+        "region": "WA",
+        "country": "US",
+        "zipcode": "98101"
+      },
+      "billingAddress": {
+        "name": "Wren Willow",
+        "address1": "254 Market St",
+        "city": "Seattle",
+        "region": "WA",
+        "country": "US",
+        "zipcode": "98101"
+      },
+      "card": {
+        "bin": "411111",
+        "last4": "1111"
+      },
+      "status": "paid",
+      "chargeId": "ch_50021",
+      "sessionId": "sess_seed0021",
+      "createdAt": "2024-08-12T12:00:00Z"
+    },
+    {
+      "id": "ORD-20022",
+      "userId": "shopper_1024",
+      "items": [
+        {
+          "productId": "p4",
+          "sku": "NB-DP-007",
+          "name": "Canvas daypack",
+          "price": 72,
+          "brand": "Northbeam",
+          "category": "Gear",
+          "qty": 1
+        }
+      ],
+      "total": 72,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Yael Yarrow",
+        "address1": "261 Market St",
+        "city": "Denver",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80202"
+      },
+      "billingAddress": {
+        "name": "Yael Yarrow",
+        "address1": "261 Market St",
+        "city": "Denver",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80202"
+      },
+      "card": {
+        "bin": "555555",
+        "last4": "4444"
+      },
+      "status": "paid",
+      "chargeId": "ch_50022",
+      "sessionId": "sess_seed0022",
+      "createdAt": "2026-06-05T12:00:00Z"
+    },
+    {
+      "id": "ORD-20023",
+      "userId": "shopper_1025",
+      "items": [
+        {
+          "productId": "p5",
+          "sku": "NB-JK-310",
+          "name": "Storm shell jacket",
+          "price": 219,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        },
+        {
+          "productId": "p2",
+          "sku": "NB-TR-220",
+          "name": "Trail running shoes",
+          "price": 129.5,
+          "brand": "Northbeam",
+          "category": "Footwear",
+          "qty": 1
+        }
+      ],
+      "total": 348.5,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Zion Zephyr",
+        "address1": "268 Market St",
+        "city": "Austin",
+        "region": "TX",
+        "country": "US",
+        "zipcode": "78701"
+      },
+      "billingAddress": {
+        "name": "Zion Zephyr",
+        "address1": "268 Market St",
+        "city": "Austin",
+        "region": "TX",
+        "country": "US",
+        "zipcode": "78701"
+      },
+      "card": {
+        "bin": "378282",
+        "last4": "0005"
+      },
+      "status": "paid",
+      "chargeId": "ch_50023",
+      "sessionId": "sess_seed0023",
+      "createdAt": "2026-01-08T12:00:00Z"
+    },
+    {
+      "id": "ORD-20024",
+      "userId": "shopper_1003",
+      "items": [
+        {
+          "productId": "p6",
+          "sku": "NB-BN-012",
+          "name": "Wool trail beanie",
+          "price": 28,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 2
+        },
+        {
+          "productId": "p5",
+          "sku": "NB-JK-310",
+          "name": "Storm shell jacket",
+          "price": 219,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        }
+      ],
+      "total": 275,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Casey Cedar",
+        "address1": "114 Market St",
+        "city": "Seattle",
+        "region": "WA",
+        "country": "US",
+        "zipcode": "98101"
+      },
+      "billingAddress": {
+        "name": "Casey Cedar",
+        "address1": "114 Market St",
+        "city": "Seattle",
+        "region": "WA",
+        "country": "US",
+        "zipcode": "98101"
+      },
+      "card": {
+        "bin": "601111",
+        "last4": "1117"
+      },
+      "status": "paid",
+      "chargeId": "ch_50024",
+      "sessionId": "sess_seed0024",
+      "createdAt": "2026-10-05T12:00:00Z"
+    },
+    {
+      "id": "ORD-20025",
+      "userId": "shopper_1004",
+      "items": [
+        {
+          "productId": "p1",
+          "sku": "NB-MS-101",
+          "name": "Merino crew sweater",
+          "price": 89,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        }
+      ],
+      "total": 89,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Devon Dale",
+        "address1": "121 Market St",
+        "city": "Denver",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80202"
+      },
+      "billingAddress": {
+        "name": "Devon Dale",
+        "address1": "121 Market St",
+        "city": "Denver",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80202"
+      },
+      "card": {
+        "bin": "400000",
+        "last4": "0077"
+      },
+      "status": "paid",
+      "chargeId": "ch_50025",
+      "sessionId": "sess_seed0025",
+      "createdAt": "2026-10-01T12:00:00Z"
+    },
+    {
+      "id": "ORD-20026",
+      "userId": "shopper_1005",
+      "items": [
+        {
+          "productId": "p2",
+          "sku": "NB-TR-220",
+          "name": "Trail running shoes",
+          "price": 129.5,
+          "brand": "Northbeam",
+          "category": "Footwear",
+          "qty": 2
+        },
+        {
+          "productId": "p5",
+          "sku": "NB-JK-310",
+          "name": "Storm shell jacket",
+          "price": 219,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        }
+      ],
+      "total": 478,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Emerson Ember",
+        "address1": "128 Market St",
+        "city": "Austin",
+        "region": "TX",
+        "country": "US",
+        "zipcode": "78701"
+      },
+      "billingAddress": {
+        "name": "Emerson Ember",
+        "address1": "128 Market St",
+        "city": "Austin",
+        "region": "TX",
+        "country": "US",
+        "zipcode": "78701"
+      },
+      "card": {
+        "bin": "411111",
+        "last4": "1111"
+      },
+      "status": "paid",
+      "chargeId": "ch_50026",
+      "sessionId": "sess_seed0026",
+      "createdAt": "2026-09-25T12:00:00Z"
+    },
+    {
+      "id": "ORD-20027",
+      "userId": "shopper_1006",
+      "items": [
+        {
+          "productId": "p3",
+          "sku": "NB-BT-032",
+          "name": "Insulated bottle, 32 oz",
+          "price": 34,
+          "brand": "Northbeam",
+          "category": "Gear",
+          "qty": 1
+        },
+        {
+          "productId": "p2",
+          "sku": "NB-TR-220",
+          "name": "Trail running shoes",
+          "price": 129.5,
+          "brand": "Northbeam",
+          "category": "Footwear",
+          "qty": 1
+        }
+      ],
+      "total": 163.5,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Finley Fern",
+        "address1": "135 Market St",
+        "city": "Boston",
+        "region": "MA",
+        "country": "US",
+        "zipcode": "02108"
+      },
+      "billingAddress": {
+        "name": "Finley Fern",
+        "address1": "135 Market St",
+        "city": "Boston",
+        "region": "MA",
+        "country": "US",
+        "zipcode": "02108"
+      },
+      "card": {
+        "bin": "555555",
+        "last4": "4444"
+      },
+      "status": "paid",
+      "chargeId": "ch_50027",
+      "sessionId": "sess_seed0027",
+      "createdAt": "2026-09-16T12:00:00Z"
+    },
+    {
+      "id": "ORD-20028",
+      "userId": "shopper_1007",
+      "items": [
+        {
+          "productId": "p4",
+          "sku": "NB-DP-007",
+          "name": "Canvas daypack",
+          "price": 72,
+          "brand": "Northbeam",
+          "category": "Gear",
+          "qty": 1
+        }
+      ],
+      "total": 72,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Gray Glenn",
+        "address1": "142 Market St",
+        "city": "Chicago",
+        "region": "IL",
+        "country": "US",
+        "zipcode": "60601"
+      },
+      "billingAddress": {
+        "name": "Gray Glenn",
+        "address1": "142 Market St",
+        "city": "Chicago",
+        "region": "IL",
+        "country": "US",
+        "zipcode": "60601"
+      },
+      "card": {
+        "bin": "378282",
+        "last4": "0005"
+      },
+      "status": "paid",
+      "chargeId": "ch_50028",
+      "sessionId": "sess_seed0028",
+      "createdAt": "2026-08-30T12:00:00Z"
+    },
+    {
+      "id": "ORD-20029",
+      "userId": "shopper_1008",
+      "items": [
+        {
+          "productId": "p5",
+          "sku": "NB-JK-310",
+          "name": "Storm shell jacket",
+          "price": 219,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        },
+        {
+          "productId": "p2",
+          "sku": "NB-TR-220",
+          "name": "Trail running shoes",
+          "price": 129.5,
+          "brand": "Northbeam",
+          "category": "Footwear",
+          "qty": 1
+        }
+      ],
+      "total": 348.5,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Harper Heath",
+        "address1": "149 Market St",
+        "city": "Boulder",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80302"
+      },
+      "billingAddress": {
+        "name": "Harper Heath",
+        "address1": "149 Market St",
+        "city": "Boulder",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80302"
+      },
+      "card": {
+        "bin": "601111",
+        "last4": "1117"
+      },
+      "status": "paid",
+      "chargeId": "ch_50029",
+      "sessionId": "sess_seed0029",
+      "createdAt": "2026-10-01T12:00:00Z"
+    },
+    {
+      "id": "ORD-20030",
+      "userId": "shopper_1009",
+      "items": [
+        {
+          "productId": "p6",
+          "sku": "NB-BN-012",
+          "name": "Wool trail beanie",
+          "price": 28,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 2
+        },
+        {
+          "productId": "p5",
+          "sku": "NB-JK-310",
+          "name": "Storm shell jacket",
+          "price": 219,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        }
+      ],
+      "total": 275,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Indigo Isle",
+        "address1": "156 Market St",
+        "city": "Salt Lake City",
+        "region": "UT",
+        "country": "US",
+        "zipcode": "84101"
+      },
+      "billingAddress": {
+        "name": "Indigo Isle",
+        "address1": "156 Market St",
+        "city": "Salt Lake City",
+        "region": "UT",
+        "country": "US",
+        "zipcode": "84101"
+      },
+      "card": {
+        "bin": "400000",
+        "last4": "0077"
+      },
+      "status": "paid",
+      "chargeId": "ch_50030",
+      "sessionId": "sess_seed0030",
+      "createdAt": "2026-09-20T12:00:00Z"
+    },
+    {
+      "id": "ORD-20031",
+      "userId": "shopper_1010",
+      "items": [
+        {
+          "productId": "p1",
+          "sku": "NB-MS-101",
+          "name": "Merino crew sweater",
+          "price": 89,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        }
+      ],
+      "total": 89,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Jordan Juniper",
+        "address1": "163 Market St",
+        "city": "Minneapolis",
+        "region": "MN",
+        "country": "US",
+        "zipcode": "55401"
+      },
+      "billingAddress": {
+        "name": "Jordan Juniper",
+        "address1": "163 Market St",
+        "city": "Minneapolis",
+        "region": "MN",
+        "country": "US",
+        "zipcode": "55401"
+      },
+      "card": {
+        "bin": "411111",
+        "last4": "1111"
+      },
+      "status": "paid",
+      "chargeId": "ch_50031",
+      "sessionId": "sess_seed0031",
+      "createdAt": "2026-09-05T12:00:00Z"
+    },
+    {
+      "id": "ORD-20032",
+      "userId": "shopper_1011",
+      "items": [
+        {
+          "productId": "p2",
+          "sku": "NB-TR-220",
+          "name": "Trail running shoes",
+          "price": 129.5,
+          "brand": "Northbeam",
+          "category": "Footwear",
+          "qty": 2
+        },
+        {
+          "productId": "p5",
+          "sku": "NB-JK-310",
+          "name": "Storm shell jacket",
+          "price": 219,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        }
+      ],
+      "total": 478,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Kai Knoll",
+        "address1": "170 Market St",
+        "city": "San Francisco",
+        "region": "CA",
+        "country": "US",
+        "zipcode": "94105"
+      },
+      "billingAddress": {
+        "name": "Kai Knoll",
+        "address1": "170 Market St",
+        "city": "San Francisco",
+        "region": "CA",
+        "country": "US",
+        "zipcode": "94105"
+      },
+      "card": {
+        "bin": "555555",
+        "last4": "4444"
+      },
+      "status": "paid",
+      "chargeId": "ch_50032",
+      "sessionId": "sess_seed0032",
+      "createdAt": "2026-08-09T12:00:00Z"
+    },
+    {
+      "id": "ORD-20033",
+      "userId": "shopper_1012",
+      "items": [
+        {
+          "productId": "p3",
+          "sku": "NB-BT-032",
+          "name": "Insulated bottle, 32 oz",
+          "price": 34,
+          "brand": "Northbeam",
+          "category": "Gear",
+          "qty": 1
+        },
+        {
+          "productId": "p2",
+          "sku": "NB-TR-220",
+          "name": "Trail running shoes",
+          "price": 129.5,
+          "brand": "Northbeam",
+          "category": "Footwear",
+          "qty": 1
+        }
+      ],
+      "total": 163.5,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Logan Linden",
+        "address1": "177 Market St",
+        "city": "Portland",
+        "region": "OR",
+        "country": "US",
+        "zipcode": "97205"
+      },
+      "billingAddress": {
+        "name": "Logan Linden",
+        "address1": "177 Market St",
+        "city": "Portland",
+        "region": "OR",
+        "country": "US",
+        "zipcode": "97205"
+      },
+      "card": {
+        "bin": "378282",
+        "last4": "0005"
+      },
+      "status": "paid",
+      "chargeId": "ch_50033",
+      "sessionId": "sess_seed0033",
+      "createdAt": "2026-07-07T12:00:00Z"
+    },
+    {
+      "id": "ORD-20034",
+      "userId": "shopper_1013",
+      "items": [
+        {
+          "productId": "p4",
+          "sku": "NB-DP-007",
+          "name": "Canvas daypack",
+          "price": 72,
+          "brand": "Northbeam",
+          "category": "Gear",
+          "qty": 1
+        }
+      ],
+      "total": 72,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Morgan Marsh",
+        "address1": "184 Market St",
+        "city": "Seattle",
+        "region": "WA",
+        "country": "US",
+        "zipcode": "98101"
+      },
+      "billingAddress": {
+        "name": "Morgan Marsh",
+        "address1": "184 Market St",
+        "city": "Seattle",
+        "region": "WA",
+        "country": "US",
+        "zipcode": "98101"
+      },
+      "card": {
+        "bin": "601111",
+        "last4": "1117"
+      },
+      "status": "paid",
+      "chargeId": "ch_50034",
+      "sessionId": "sess_seed0034",
+      "createdAt": "2026-05-26T12:00:00Z"
+    },
+    {
+      "id": "ORD-20035",
+      "userId": "shopper_1014",
+      "items": [
+        {
+          "productId": "p5",
+          "sku": "NB-JK-310",
+          "name": "Storm shell jacket",
+          "price": 219,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        },
+        {
+          "productId": "p2",
+          "sku": "NB-TR-220",
+          "name": "Trail running shoes",
+          "price": 129.5,
+          "brand": "Northbeam",
+          "category": "Footwear",
+          "qty": 1
+        }
+      ],
+      "total": 348.5,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Noel North",
+        "address1": "191 Market St",
+        "city": "Denver",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80202"
+      },
+      "billingAddress": {
+        "name": "Noel North",
+        "address1": "191 Market St",
+        "city": "Denver",
+        "region": "CO",
+        "country": "US",
+        "zipcode": "80202"
+      },
+      "card": {
+        "bin": "400000",
+        "last4": "0077"
+      },
+      "status": "paid",
+      "chargeId": "ch_50035",
+      "sessionId": "sess_seed0035",
+      "createdAt": "2026-03-12T12:00:00Z"
+    },
+    {
+      "id": "ORD-20036",
+      "userId": "shopper_1015",
+      "items": [
+        {
+          "productId": "p6",
+          "sku": "NB-BN-012",
+          "name": "Wool trail beanie",
+          "price": 28,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 2
+        },
+        {
+          "productId": "p5",
+          "sku": "NB-JK-310",
+          "name": "Storm shell jacket",
+          "price": 219,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        }
+      ],
+      "total": 275,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Oakley Orchard",
+        "address1": "198 Market St",
+        "city": "Austin",
+        "region": "TX",
+        "country": "US",
+        "zipcode": "78701"
+      },
+      "billingAddress": {
+        "name": "Oakley Orchard",
+        "address1": "198 Market St",
+        "city": "Austin",
+        "region": "TX",
+        "country": "US",
+        "zipcode": "78701"
+      },
+      "card": {
+        "bin": "411111",
+        "last4": "1111"
+      },
+      "status": "paid",
+      "chargeId": "ch_50036",
+      "sessionId": "sess_seed0036",
+      "createdAt": "2026-09-01T12:00:00Z"
+    },
+    {
+      "id": "ORD-20037",
+      "userId": "shopper_1016",
+      "items": [
+        {
+          "productId": "p1",
+          "sku": "NB-MS-101",
+          "name": "Merino crew sweater",
+          "price": 89,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        }
+      ],
+      "total": 89,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Parker Pine",
+        "address1": "205 Market St",
+        "city": "Boston",
+        "region": "MA",
+        "country": "US",
+        "zipcode": "02108"
+      },
+      "billingAddress": {
+        "name": "Parker Pine",
+        "address1": "205 Market St",
+        "city": "Boston",
+        "region": "MA",
+        "country": "US",
+        "zipcode": "02108"
+      },
+      "card": {
+        "bin": "555555",
+        "last4": "4444"
+      },
+      "status": "paid",
+      "chargeId": "ch_50037",
+      "sessionId": "sess_seed0037",
+      "createdAt": "2026-07-09T12:00:00Z"
+    },
+    {
+      "id": "ORD-20038",
+      "userId": "shopper_1019",
+      "items": [
+        {
+          "productId": "p2",
+          "sku": "NB-TR-220",
+          "name": "Trail running shoes",
+          "price": 129.5,
+          "brand": "Northbeam",
+          "category": "Footwear",
+          "qty": 2
+        },
+        {
+          "productId": "p5",
+          "sku": "NB-JK-310",
+          "name": "Storm shell jacket",
+          "price": 219,
+          "brand": "Northbeam",
+          "category": "Apparel",
+          "qty": 1
+        }
+      ],
+      "total": 478,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Sage Stone",
+        "address1": "226 Market St",
+        "city": "Salt Lake City",
+        "region": "UT",
+        "country": "US",
+        "zipcode": "84101"
+      },
+      "billingAddress": {
+        "name": "Sage Stone",
+        "address1": "226 Market St",
+        "city": "Salt Lake City",
+        "region": "UT",
+        "country": "US",
+        "zipcode": "84101"
+      },
+      "card": {
+        "bin": "378282",
+        "last4": "0005"
+      },
+      "status": "paid",
+      "chargeId": "ch_50038",
+      "sessionId": "sess_seed0038",
+      "createdAt": "2026-04-04T12:00:00Z"
+    },
+    {
+      "id": "ORD-20039",
+      "userId": "shopper_1020",
+      "items": [
+        {
+          "productId": "p3",
+          "sku": "NB-BT-032",
+          "name": "Insulated bottle, 32 oz",
+          "price": 34,
+          "brand": "Northbeam",
+          "category": "Gear",
+          "qty": 1
+        },
+        {
+          "productId": "p2",
+          "sku": "NB-TR-220",
+          "name": "Trail running shoes",
+          "price": 129.5,
+          "brand": "Northbeam",
+          "category": "Footwear",
+          "qty": 1
+        }
+      ],
+      "total": 163.5,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Taylor Thorne",
+        "address1": "233 Market St",
+        "city": "Minneapolis",
+        "region": "MN",
+        "country": "US",
+        "zipcode": "55401"
+      },
+      "billingAddress": {
+        "name": "Taylor Thorne",
+        "address1": "233 Market St",
+        "city": "Minneapolis",
+        "region": "MN",
+        "country": "US",
+        "zipcode": "55401"
+      },
+      "card": {
+        "bin": "601111",
+        "last4": "1117"
+      },
+      "status": "paid",
+      "chargeId": "ch_50039",
+      "sessionId": "sess_seed0039",
+      "createdAt": "2025-12-12T12:00:00Z"
+    },
+    {
+      "id": "ORD-20040",
+      "userId": "shopper_1021",
+      "items": [
+        {
+          "productId": "p4",
+          "sku": "NB-DP-007",
+          "name": "Canvas daypack",
+          "price": 72,
+          "brand": "Northbeam",
+          "category": "Gear",
+          "qty": 1
+        }
+      ],
+      "total": 72,
+      "currency": "USD",
+      "shippingAddress": {
+        "name": "Umi Upton",
+        "address1": "240 Market St",
+        "city": "San Francisco",
+        "region": "CA",
+        "country": "US",
+        "zipcode": "94105"
+      },
+      "billingAddress": {
+        "name": "Umi Upton",
+        "address1": "240 Market St",
+        "city": "San Francisco",
+        "region": "CA",
+        "country": "US",
+        "zipcode": "94105"
+      },
+      "card": {
+        "bin": "400000",
+        "last4": "0077"
+      },
+      "status": "paid",
+      "chargeId": "ch_50040",
+      "sessionId": "sess_seed0040",
+      "createdAt": "2025-07-28T12:00:00Z"
+    }
+  ]
+}

@@ -1,0 +1,374 @@
+{
+  "name": "27-account-payment-method",
+  "description": "Card on file in the account. No session is 401 for PUT and DELETE /api/account/payment-method; a new account has no paymentMethod; PUT saves token, cardBin, cardLast4 (type defaults to card) and GET /api/account returns the card without its token (token absent; the token stays server-side); a numeric cardBin, a 5-digit cardBin, a 3-digit cardLast4, a numeric cardLast4, a blank token, a missing token, an empty body and a non-text type (a number, null) are 400, and a text/plain body is 415, and the saved card is unchanged; PUT replaces it (8-digit BIN, type given); the card survives logout and login; DELETE removes it (and is 200 when none is saved).",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account/payment-method",
+        "body": {
+          "token": "tok_fixture_card",
+          "cardBin": "411111",
+          "cardLast4": "1111"
+        }
+      },
+      "expect": {
+        "status": 401,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/account/payment-method"
+      },
+      "expect": {
+        "status": 401,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "pm1+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "Account@user",
+        "match": {
+          "user": {
+            "paymentMethod": "<absent>"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account/payment-method",
+        "body": {
+          "token": "tok_fixture_card",
+          "cardBin": "411111",
+          "cardLast4": "1111"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "paymentMethod": {
+            "token": "<absent>",
+            "cardBin": "411111",
+            "cardLast4": "1111",
+            "type": "card"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "Account@user",
+        "match": {
+          "user": {
+            "paymentMethod": {
+              "token": "<absent>",
+              "cardBin": "411111",
+              "cardLast4": "1111",
+              "type": "card"
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account/payment-method",
+        "body": {
+          "token": "tok_fixture_card",
+          "cardBin": 411111,
+          "cardLast4": "1111"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account/payment-method",
+        "body": {
+          "token": "tok_fixture_card",
+          "cardBin": "41111",
+          "cardLast4": "1111"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account/payment-method",
+        "body": {
+          "token": "tok_fixture_card",
+          "cardBin": "411111",
+          "cardLast4": "111"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account/payment-method",
+        "body": {
+          "token": "tok_fixture_card",
+          "cardBin": "411111",
+          "cardLast4": 1111
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account/payment-method",
+        "body": {
+          "token": "   ",
+          "cardBin": "411111",
+          "cardLast4": "1111"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account/payment-method",
+        "body": {
+          "cardBin": "411111",
+          "cardLast4": "1111"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account/payment-method",
+        "body": {}
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account/payment-method",
+        "body": {
+          "token": "tok_fixture_card",
+          "cardBin": "411111",
+          "cardLast4": "1111",
+          "type": 5
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account/payment-method",
+        "body": {
+          "token": "tok_fixture_card",
+          "cardBin": "411111",
+          "cardLast4": "1111",
+          "type": null
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account/payment-method",
+        "headers": {
+          "Content-Type": "text/plain"
+        },
+        "rawBody": "{\"token\":\"tok_fixture_card\",\"cardBin\":\"411111\",\"cardLast4\":\"1111\"}"
+      },
+      "expect": {
+        "status": 415,
+        "schema": "Error",
+        "match": {
+          "error": "Content-Type must be application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "user": {
+            "paymentMethod": {
+              "token": "<absent>",
+              "cardBin": "411111",
+              "cardLast4": "1111",
+              "type": "card"
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account/payment-method",
+        "body": {
+          "token": "tok_fixture_other",
+          "cardBin": "41111111",
+          "cardLast4": "4242",
+          "type": "card"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "paymentMethod": {
+            "token": "<absent>",
+            "cardBin": "41111111",
+            "cardLast4": "4242",
+            "type": "card"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/logout"
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "body": {
+          "email": "pm1+{{runId}}@example.com",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "user": {
+            "paymentMethod": {
+              "token": "<absent>",
+              "cardLast4": "4242"
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/account/payment-method"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "ok": true
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "user": {
+            "paymentMethod": "<absent>"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/account/payment-method"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "ok": true
+        }
+      }
+    }
+  ]
+}

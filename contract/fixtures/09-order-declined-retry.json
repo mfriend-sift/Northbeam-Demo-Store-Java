@@ -1,0 +1,236 @@
+{
+  "name": "09-order-declined-retry",
+  "description": "Saving with an empty cart is 400; tok_declined gives 402 and payment_failed; shipping can still be changed on a payment_failed order; the same order can be paid again; a paid order cannot be paid twice (409), and a bad body on a paid order is 400 (400 before 409).",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "fixture+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user",
+        "match": {
+          "user": {
+            "name": "Fixture Shopper",
+            "email": "fixture+{{runId}}@example.com",
+            "phone": "+14155550199"
+          }
+        }
+      },
+      "save": {
+        "userId": "user.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "cart": [
+            {
+              "productId": "p1",
+              "qty": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "Order@order",
+        "match": {
+          "order": {
+            "id": "<string>",
+            "status": "saved"
+          }
+        }
+      },
+      "save": {
+        "orderId": "order.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{orderId}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_declined",
+            "cardBin": "411111",
+            "cardLast4": "0002"
+          }
+        }
+      },
+      "expect": {
+        "status": 402,
+        "schema": "Order@order",
+        "match": {
+          "order": {
+            "id": "{{orderId}}",
+            "status": "payment_failed",
+            "declineCode": "insufficient_funds"
+          },
+          "error": "<string>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/orders/{{orderId}}/shipping",
+        "body": {
+          "shippingMethod": "expedited"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "OrderResponse",
+        "match": {
+          "order": {
+            "id": "{{orderId}}",
+            "status": "payment_failed",
+            "shippingMethod": "expedited"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/cart"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "cart": []
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{orderId}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa",
+            "cardBin": "411111",
+            "cardLast4": "1111"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "order": {
+            "status": "paid",
+            "declineCode": "<absent>",
+            "card": {
+              "last4": "1111"
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{orderId}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa"
+          }
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{orderId}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa",
+            "cardBin": "411111",
+            "cardLast4": "1111"
+          }
+        }
+      },
+      "expect": {
+        "status": 409,
+        "schema": "Error",
+        "match": {
+          "error": "This order is already paid"
+        }
+      }
+    }
+  ]
+}

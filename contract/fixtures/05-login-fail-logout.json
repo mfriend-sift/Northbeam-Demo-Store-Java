@@ -1,0 +1,68 @@
+{
+  "name": "05-login-fail-logout",
+  "description": "Wrong password is 401; logout forgets the user; a second logout with nobody signed in answers the same 200 { ok: true }.",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "body": {
+          "email": "avery.alder@example.com",
+          "password": "wrong"
+        }
+      },
+      "expect": {
+        "status": 401,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "body": {
+          "email": "avery.alder@example.com",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/logout"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "ok": true
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/logout"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "ok": true
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 401,
+        "schema": "Error"
+      }
+    }
+  ]
+}

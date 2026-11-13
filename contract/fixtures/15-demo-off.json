@@ -1,0 +1,32 @@
+{
+  "name": "15-demo-off",
+  "description": "Without DEMO=1: /demo/* is 404 and no CORS headers are sent.",
+  "demo": false,
+  "onlyWithoutDemo": true,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/demo/reset"
+      },
+      "expect": {
+        "status": 404
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/products",
+        "headers": {
+          "Origin": "http://localhost:4010"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-origin": "<absent>"
+        }
+      }
+    }
+  ]
+}

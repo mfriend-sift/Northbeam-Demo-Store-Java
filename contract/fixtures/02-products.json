@@ -1,0 +1,25 @@
+{
+  "name": "02-products",
+  "description": "Products come from seed.json, as a bare array.",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/products"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "Product[]",
+        "match": [
+          {
+            "id": "p1",
+            "sku": "NB-MS-101",
+            "price": 89
+          },
+          "<...>"
+        ]
+      }
+    }
+  ]
+}

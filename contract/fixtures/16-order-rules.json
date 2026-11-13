@@ -1,0 +1,340 @@
+{
+  "name": "16-order-rules",
+  "description": "Guests get 401 (save, shipping, pay); other users' and unknown orders are 404; bad save, shipping and pay input (including a numeric cardBin or a 2-digit cardLast4) is 400; a saved order is listed as saved. The three order-rule messages (addresses, shipping, payment) are pinned word for word.",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 401,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/orders/ORD-20001/shipping",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "1 Ferry Building",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94111"
+          }
+        }
+      },
+      "expect": {
+        "status": 401,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/ORD-20001/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa",
+            "cardBin": "411111",
+            "cardLast4": "1111"
+          }
+        }
+      },
+      "expect": {
+        "status": 401,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "fixture+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user",
+        "match": {
+          "user": {
+            "name": "Fixture Shopper",
+            "email": "fixture+{{runId}}@example.com",
+            "phone": "+14155550199"
+          }
+        }
+      },
+      "save": {
+        "userId": "user.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/ORD-20001/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa",
+            "cardBin": "411111",
+            "cardLast4": "1111"
+          }
+        }
+      },
+      "expect": {
+        "status": 404,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/ORD-99999/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa",
+            "cardBin": "411111",
+            "cardLast4": "1111"
+          }
+        }
+      },
+      "expect": {
+        "status": 404,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p3",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "cart": [
+            {
+              "productId": "p3",
+              "qty": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "shippingMethod": "overnight"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "shippingMethod must be standard or expedited"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "Shipping and billing addresses need name, address1, city, region, country, and zipcode (non-empty text, at most 200 characters each)"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "shippingMethod": "expedited"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "match": {
+          "order": {
+            "status": "saved",
+            "shippingMethod": "expedited",
+            "total": 34
+          }
+        }
+      },
+      "save": {
+        "orderId": "order.id"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/orders/{{orderId}}/shipping",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "1 Ferry Building"
+          }
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "shippingAddress is incomplete: every field must be non-empty text of at most 200 characters"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{orderId}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa"
+          }
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "Payment needs token (non-empty text, at most 200 characters), cardBin (6 or 8 digits), and cardLast4 (4 digits)"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{orderId}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa",
+            "cardBin": 424242,
+            "cardLast4": "4242"
+          }
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "Payment needs token (non-empty text, at most 200 characters), cardBin (6 or 8 digits), and cardLast4 (4 digits)"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{orderId}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa",
+            "cardBin": "424242",
+            "cardLast4": "12"
+          }
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "Payment needs token (non-empty text, at most 200 characters), cardBin (6 or 8 digits), and cardLast4 (4 digits)"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/orders"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "orders": [
+            {
+              "id": "{{orderId}}",
+              "status": "saved"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

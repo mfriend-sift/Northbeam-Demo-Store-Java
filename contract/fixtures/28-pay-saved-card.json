@@ -1,0 +1,495 @@
+{
+  "name": "28-pay-saved-card",
+  "description": "POST /api/orders/{id}/pay without a payment in the body uses the account's saved card; the request must still be JSON, so a body-less pay is 415 and the tests send {} (a body that is null or an array is 400, not a fallback). With no card on file it is 400 'No payment method on file' and the order stays saved and payable; a null or invalid payment in the body is 400 even when a card is saved (no fallback); a saved card pays (200 paid, the order snapshots card.bin and card.last4); a saved declined token is 402 payment_failed with the card snapshot and the order can be paid again after the card is replaced; a payment in the body still works as before and does not change the saved card; GET /api/account never returns the saved token. A paid order with no card on file, or with an invalid payment, is 400 (the card checks come before the 409 order-state check); with a valid payment it is 409 already paid.",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "pm2+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "Order@order",
+        "match": {
+          "order": {
+            "status": "saved",
+            "card": "<absent>"
+          }
+        }
+      },
+      "save": {
+        "o1": "order.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o1}}/pay",
+        "body": {}
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "No payment method on file"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/orders"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "orders": [
+            {
+              "id": "{{o1}}",
+              "status": "saved",
+              "card": "<absent>"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account/payment-method",
+        "body": {
+          "token": "tok_fixture_card",
+          "cardBin": "411111",
+          "cardLast4": "1111"
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o1}}/pay",
+        "body": {
+          "payment": null
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "<contains:cardBin>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o1}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_x",
+            "cardBin": "41111",
+            "cardLast4": "1111"
+          }
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o1}}/pay",
+        "rawBody": "null"
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o1}}/pay",
+        "rawBody": "[]"
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o1}}/pay"
+      },
+      "expect": {
+        "status": 415,
+        "schema": "Error",
+        "match": {
+          "error": "Content-Type must be application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o1}}/pay",
+        "body": {}
+      },
+      "expect": {
+        "status": 200,
+        "schema": "Order@order",
+        "match": {
+          "order": {
+            "id": "{{o1}}",
+            "status": "paid",
+            "chargeId": "<string>",
+            "card": {
+              "bin": "411111",
+              "last4": "1111"
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o1}}/pay",
+        "body": {}
+      },
+      "expect": {
+        "status": 409,
+        "schema": "Error",
+        "match": {
+          "error": "This order is already paid"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "Order@order",
+        "match": {
+          "order": {
+            "status": "saved",
+            "card": "<absent>"
+          }
+        }
+      },
+      "save": {
+        "o2": "order.id"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account/payment-method",
+        "body": {
+          "token": "tok_declined",
+          "cardBin": "411111",
+          "cardLast4": "0002"
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o2}}/pay",
+        "body": {}
+      },
+      "expect": {
+        "status": 402,
+        "match": {
+          "error": "Your card was declined",
+          "order": {
+            "status": "payment_failed",
+            "declineCode": "insufficient_funds",
+            "card": {
+              "bin": "411111",
+              "last4": "0002"
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account/payment-method",
+        "body": {
+          "token": "tok_fixture_card",
+          "cardBin": "411111",
+          "cardLast4": "1111"
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o2}}/pay",
+        "body": {}
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "order": {
+            "status": "paid",
+            "card": {
+              "bin": "411111",
+              "last4": "1111"
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "Order@order",
+        "match": {
+          "order": {
+            "status": "saved",
+            "card": "<absent>"
+          }
+        }
+      },
+      "save": {
+        "o3": "order.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o3}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa",
+            "cardBin": "550000",
+            "cardLast4": "4444"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "order": {
+            "status": "paid",
+            "card": {
+              "bin": "550000",
+              "last4": "4444"
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "user": {
+            "paymentMethod": {
+              "token": "<absent>",
+              "cardBin": "411111",
+              "cardLast4": "1111",
+              "type": "card"
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/account/payment-method"
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o1}}/pay",
+        "body": {}
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "No payment method on file"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o1}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_x",
+            "cardBin": "41111",
+            "cardLast4": "1111"
+          }
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o1}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa",
+            "cardBin": "411111",
+            "cardLast4": "1111"
+          }
+        }
+      },
+      "expect": {
+        "status": 409,
+        "schema": "Error",
+        "match": {
+          "error": "This order is already paid"
+        }
+      }
+    }
+  ]
+}

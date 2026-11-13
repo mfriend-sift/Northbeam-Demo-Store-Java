@@ -1,0 +1,63 @@
+{
+  "name": "35-verification-no-demo-code",
+  "description": "Without DEMO=1 the code is random and server-side only: neither the start reply nor the notice contains a code, and the notice still lists the send (kind verification_code, channel email).",
+  "demo": false,
+  "onlyWithoutDemo": true,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "ver6+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/start",
+        "body": {
+          "channel": "email"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "status": "pending",
+          "channel": "email",
+          "code": "<absent>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "Account@user",
+        "match": {
+          "user": {
+            "verified": false
+          },
+          "notices": [
+            {
+              "kind": "verification_code",
+              "channel": "email",
+              "code": "<absent>"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

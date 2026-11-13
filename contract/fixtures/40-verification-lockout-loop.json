@@ -1,0 +1,234 @@
+{
+  "name": "40-verification-lockout-loop",
+  "description": "The verify-own-email loop cannot dodge the lockout (DEMO=1 clock). The wrong-code count is kept per destination. 4 wrong sms codes (attempts 4, attemptsLeft 1), then a code started on the email and confirmed (success: verified true), then the email is changed (verified is cleared). A new sms code is started after the cooldown and the next wrong sms code is attempts 5 (attemptsLeft 0): the account is locked, and even 123456 is 429. The success on the email did not clear the count for the phone.",
+  "demo": true,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "ver9+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/start",
+        "headers": {
+          "X-Demo-Now": "4102444800000"
+        },
+        "body": {
+          "channel": "sms"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "status": "pending"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "headers": {
+          "X-Demo-Now": "4102444800000"
+        },
+        "body": {
+          "code": "000000"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Attempts",
+        "match": {
+          "error": "That code is not correct",
+          "attempts": 1,
+          "attemptsLeft": 4
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "headers": {
+          "X-Demo-Now": "4102444800000"
+        },
+        "body": {
+          "code": "000000"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Attempts",
+        "match": {
+          "error": "That code is not correct",
+          "attempts": 2,
+          "attemptsLeft": 3
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "headers": {
+          "X-Demo-Now": "4102444800000"
+        },
+        "body": {
+          "code": "000000"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Attempts",
+        "match": {
+          "error": "That code is not correct",
+          "attempts": 3,
+          "attemptsLeft": 2
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "headers": {
+          "X-Demo-Now": "4102444800000"
+        },
+        "body": {
+          "code": "000000"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Attempts",
+        "match": {
+          "error": "That code is not correct",
+          "attempts": 4,
+          "attemptsLeft": 1
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/start",
+        "headers": {
+          "X-Demo-Now": "4102444831000"
+        },
+        "body": {
+          "channel": "email"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "status": "pending"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "headers": {
+          "X-Demo-Now": "4102444831000"
+        },
+        "body": {
+          "code": "123456"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "status": "success",
+          "verified": true
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account",
+        "body": {
+          "email": "ver9b+{{runId}}@example.com"
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/start",
+        "headers": {
+          "X-Demo-Now": "4102444862000"
+        },
+        "body": {
+          "channel": "sms"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "status": "pending"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "headers": {
+          "X-Demo-Now": "4102444862000"
+        },
+        "body": {
+          "code": "000000"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Attempts",
+        "match": {
+          "error": "That code is not correct",
+          "attempts": 5,
+          "attemptsLeft": 0
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "headers": {
+          "X-Demo-Now": "4102444862000"
+        },
+        "body": {
+          "code": "123456"
+        }
+      },
+      "expect": {
+        "status": 429,
+        "schema": "Attempts",
+        "match": {
+          "error": "Too many wrong codes. Try again later",
+          "attemptsLeft": 0,
+          "retryAfterSeconds": "<number>"
+        }
+      }
+    }
+  ]
+}

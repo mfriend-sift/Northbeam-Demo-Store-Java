@@ -1,0 +1,76 @@
+{
+  "name": "17-bad-json-order",
+  "description": "Order of answers when the body is not valid JSON: unknown route 404 first, then 401 (no session), then the resource 404 (unknown order id), and only then 400 {error: Invalid JSON}. rawBody sends the bytes as written.",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/no-such-route",
+        "rawBody": "{ not json"
+      },
+      "expect": {
+        "status": 404,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "rawBody": "{ not json"
+      },
+      "expect": {
+        "status": 401,
+        "schema": "Error",
+        "match": {
+          "error": "Sign in first"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "fixture+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/orders/ORD-99999/shipping",
+        "rawBody": "{ not json"
+      },
+      "expect": {
+        "status": 404,
+        "schema": "Error",
+        "match": {
+          "error": "Order not found"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account",
+        "rawBody": "{ not json"
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "Invalid JSON"
+        }
+      }
+    }
+  ]
+}

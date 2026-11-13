@@ -1,0 +1,567 @@
+{
+  "name": "21-order-cancel-fulfill",
+  "description": "Order status changes. Cancel a saved order (200, status canceled); cancel twice is 409 'Order cannot be canceled'; shipping update and pay on a canceled order are 409; cancel a paid order is allowed; an unknown order is 404; a fulfillment webhook (POST /webhooks/fulfillment, no session) fulfills a paid order; fulfilling an unpaid (saved) order is 409 'Order cannot be fulfilled'; fulfilling an unknown order is 404; a fulfilled order cannot be canceled (409). Another user's order is 404 for cancel. The /demo/orders/{id}/ship cases are in 21b-order-ship-demo.",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "fixture+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "Order@order",
+        "match": {
+          "order": {
+            "status": "saved"
+          }
+        }
+      },
+      "save": {
+        "o1": "order.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o1}}/cancel"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "Order@order",
+        "match": {
+          "order": {
+            "id": "{{o1}}",
+            "status": "canceled"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o1}}/cancel"
+      },
+      "expect": {
+        "status": 409,
+        "schema": "Error",
+        "match": {
+          "error": "Order cannot be canceled"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/orders/{{o1}}/shipping",
+        "body": {
+          "shippingMethod": "expedited"
+        }
+      },
+      "expect": {
+        "status": 409,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o1}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa",
+            "cardBin": "411111",
+            "cardLast4": "1111"
+          }
+        }
+      },
+      "expect": {
+        "status": 409,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "Order@order",
+        "match": {
+          "order": {
+            "status": "saved"
+          }
+        }
+      },
+      "save": {
+        "o2": "order.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o2}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa",
+            "cardBin": "411111",
+            "cardLast4": "1111"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "order": {
+            "status": "paid"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o2}}/cancel"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "order": {
+            "status": "canceled"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/ORD-99999/cancel"
+      },
+      "expect": {
+        "status": 404,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "Order@order",
+        "match": {
+          "order": {
+            "status": "saved"
+          }
+        }
+      },
+      "save": {
+        "o3": "order.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/webhooks/fulfillment",
+        "body": {
+          "orderId": "{{o3}}",
+          "event": "shipment.created"
+        }
+      },
+      "expect": {
+        "status": 409,
+        "schema": "Error",
+        "match": {
+          "error": "Order cannot be fulfilled"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o3}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa",
+            "cardBin": "411111",
+            "cardLast4": "1111"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "order": {
+            "status": "paid"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/webhooks/fulfillment",
+        "body": {
+          "orderId": "{{o3}}",
+          "event": "shipment.created"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "received": true
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o3}}/cancel"
+      },
+      "expect": {
+        "status": 409,
+        "schema": "Error",
+        "match": {
+          "error": "Order cannot be canceled"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/orders/{{o3}}/shipping",
+        "body": {
+          "shippingMethod": "expedited"
+        }
+      },
+      "expect": {
+        "status": 409,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/webhooks/fulfillment",
+        "body": {
+          "orderId": "{{o3}}",
+          "event": "shipment.created"
+        }
+      },
+      "expect": {
+        "status": 409,
+        "schema": "Error",
+        "match": {
+          "error": "Order cannot be fulfilled"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/webhooks/fulfillment",
+        "body": {
+          "orderId": "ORD-99999",
+          "event": "shipment.created"
+        }
+      },
+      "expect": {
+        "status": 404,
+        "schema": "Error",
+        "match": {
+          "error": "Order not found"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/webhooks/fulfillment",
+        "body": {
+          "orderId": "{{o3}}",
+          "event": "shipment.delayed"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "received": true
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "Order@order",
+        "match": {
+          "order": {
+            "status": "saved"
+          }
+        }
+      },
+      "save": {
+        "o4": "order.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o4}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa",
+            "cardBin": "411111",
+            "cardLast4": "1111"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "order": {
+            "status": "paid"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "Order@order",
+        "match": {
+          "order": {
+            "status": "saved"
+          }
+        }
+      },
+      "save": {
+        "o5": "order.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/logout"
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o5}}/cancel"
+      },
+      "expect": {
+        "status": 401,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Other Shopper",
+          "email": "other+{{runId}}@example.com",
+          "phone": "415-555-0188",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o5}}/cancel"
+      },
+      "expect": {
+        "status": 404,
+        "schema": "Error"
+      }
+    }
+  ]
+}

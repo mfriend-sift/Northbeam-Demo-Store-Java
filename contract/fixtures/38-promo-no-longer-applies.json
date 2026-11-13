@@ -1,0 +1,278 @@
+{
+  "name": "38-promo-no-longer-applies",
+  "description": "A promo code that stops applying stays on the cart. SAVE5 (cart of 100 or more) is applied on p6 x 4 (112; discount 5, applies true); p1 is added and p6 removed so the cart is 89: GET /api/cart still returns promotion { code SAVE5, applies false, reason the word not_applicable, a separate message sentence mentioning 100, and the code's terms (description, type amount, value 5, minimum 100) } with discount 0, and applying another code is 422 (already applied). POST /api/orders is 409 with the reason and creates no order; the cart and the code are unchanged. DELETE /api/cart/promo with a text/plain body is 415 (the Content-Type rule) and changes nothing; a plain DELETE clears the code and the order is then 201 at the full price 89 with no promotion. A code longer than 64 characters is 422 'That promo code is not valid'. By design the order stays 409 while the stale code is on the cart, even though the cart already shows the full price: the shopper removes the code (or fixes the cart) first.",
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "promo2+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p6",
+          "qty": 4
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "SAVE5"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "promotion": {
+            "code": "SAVE5",
+            "applies": true
+          },
+          "discount": 5
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "promotion": {
+            "code": "SAVE5",
+            "applies": true
+          },
+          "discount": 5
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/cart/items/p6"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "promotion": {
+            "code": "SAVE5",
+            "applies": false,
+            "reason": "not_applicable",
+            "message": "<contains:100>",
+            "description": "5 dollars off orders of 100 dollars or more",
+            "type": "amount",
+            "value": 5,
+            "minimum": 100
+          },
+          "discount": 0
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/cart"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "promotion": {
+            "code": "SAVE5",
+            "applies": false,
+            "reason": "not_applicable",
+            "message": "<contains:100>",
+            "description": "5 dollars off orders of 100 dollars or more",
+            "type": "amount",
+            "value": 5,
+            "minimum": 100
+          },
+          "discount": 0
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "WELCOME10"
+        }
+      },
+      "expect": {
+        "status": 422,
+        "schema": "Error",
+        "match": {
+          "error": "<contains:already applied>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 409,
+        "schema": "Error",
+        "match": {
+          "error": "<contains-all:100,Review your cart>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/cart"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "cart": [
+            {
+              "productId": "p1",
+              "qty": 1
+            }
+          ],
+          "promotion": {
+            "code": "SAVE5",
+            "applies": false,
+            "reason": "not_applicable",
+            "message": "<contains:100>",
+            "description": "5 dollars off orders of 100 dollars or more",
+            "type": "amount",
+            "value": 5,
+            "minimum": 100
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/cart/promo",
+        "headers": {
+          "Content-Type": "text/plain"
+        },
+        "rawBody": "x"
+      },
+      "expect": {
+        "status": 415,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/cart/promo"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "promotion": "<absent>",
+          "discount": "<absent>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        }
+      },
+      "expect": {
+        "status": 422,
+        "schema": "Error",
+        "match": {
+          "error": "That promo code is not valid"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "OrderResponse",
+        "match": {
+          "order": {
+            "total": 89,
+            "promotion": "<absent>",
+            "discount": "<absent>",
+            "status": "saved"
+          }
+        }
+      }
+    }
+  ]
+}

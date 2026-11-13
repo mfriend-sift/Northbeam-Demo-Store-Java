@@ -1,0 +1,198 @@
+{
+  "name": "21b-order-ship-demo",
+  "description": "The demo ship route, split out of fixture 21 so that 21 passes without DEMO=1. A paid order is fulfilled by POST /demo/orders/{id}/ship through the same handler as the fulfillment webhook (200, ok, webhookStatus 200); shipping it again is 409 'Order cannot be fulfilled'; an unknown order is 404; a saved (unpaid) order is 409.",
+  "demo": true,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "fixture+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "Order@order",
+        "match": {
+          "order": {
+            "status": "saved"
+          }
+        }
+      },
+      "save": {
+        "o1": "order.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/{{o1}}/pay",
+        "body": {
+          "payment": {
+            "token": "tok_visa",
+            "cardBin": "411111",
+            "cardLast4": "1111"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "order": {
+            "status": "paid"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/demo/orders/{{o1}}/ship"
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "ok": true,
+          "webhookStatus": 200,
+          "webhook": {
+            "orderId": "{{o1}}",
+            "event": "shipment.created"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/demo/orders/{{o1}}/ship"
+      },
+      "expect": {
+        "status": 409,
+        "schema": "Error",
+        "match": {
+          "error": "Order cannot be fulfilled"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/demo/orders/ORD-99999/ship"
+      },
+      "expect": {
+        "status": 404,
+        "schema": "Error",
+        "match": {
+          "error": "Order not found"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p1",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "body": {
+          "shippingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          },
+          "billingAddress": {
+            "name": "Fixture Shopper",
+            "address1": "100 Market St",
+            "city": "San Francisco",
+            "region": "CA",
+            "country": "US",
+            "zipcode": "94105"
+          }
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "Order@order",
+        "match": {
+          "order": {
+            "status": "saved"
+          }
+        }
+      },
+      "save": {
+        "o2": "order.id"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/demo/orders/{{o2}}/ship"
+      },
+      "expect": {
+        "status": 409,
+        "schema": "Error",
+        "match": {
+          "error": "Order cannot be fulfilled"
+        }
+      }
+    }
+  ]
+}

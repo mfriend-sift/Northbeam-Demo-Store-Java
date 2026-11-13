@@ -1,0 +1,267 @@
+{
+  "name": "30-cart-promo-rejected",
+  "description": "Rejected promo codes: an unknown code and an expired code (EXPIRED20) are 422 with their own message, SAVE5 on a cart under 100 is 422 (not applicable) and works once the cart reaches 100 (p6 at 28 x 4 = 112); a rejected code changes nothing (the cart has no promotion). A missing code, a blank code, a non-text code and an empty body are 400 (before any code is looked at); a text/plain body is 415. A promo route that does not exist (POST /api/orders/{id}/promo, POST /api/promo) is 404.",
+  "demo": false,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "promo2+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p6",
+          "qty": 1
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "NOSUCHCODE"
+        }
+      },
+      "expect": {
+        "status": 422,
+        "schema": "Error",
+        "match": {
+          "error": "That promo code is not valid"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "EXPIRED20"
+        }
+      },
+      "expect": {
+        "status": 422,
+        "schema": "Error",
+        "match": {
+          "error": "That promo code has expired"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "SAVE5"
+        }
+      },
+      "expect": {
+        "status": 422,
+        "schema": "Error",
+        "match": {
+          "error": "That promo code needs a cart of 100 dollars or more"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/cart"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "cart": [
+            {
+              "productId": "p6",
+              "qty": 1
+            }
+          ],
+          "promotion": "<absent>",
+          "discount": "<absent>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {}
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "code is required"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "   "
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "code is required"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": 10
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "code is required"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": null
+        }
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "rawBody": "{bad"
+      },
+      "expect": {
+        "status": 400,
+        "schema": "Error",
+        "match": {
+          "error": "Invalid JSON"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "headers": {
+          "Content-Type": "text/plain"
+        },
+        "rawBody": "x"
+      },
+      "expect": {
+        "status": 415,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo"
+      },
+      "expect": {
+        "status": 415,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/orders/ORD-20041/promo",
+        "body": {
+          "code": "WELCOME10"
+        }
+      },
+      "expect": {
+        "status": 404,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/promo",
+        "body": {
+          "code": "WELCOME10"
+        }
+      },
+      "expect": {
+        "status": 404,
+        "schema": "Error"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/items",
+        "body": {
+          "productId": "p6",
+          "qty": 3
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/cart/promo",
+        "body": {
+          "code": "SAVE5"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "schema": "CartResponse",
+        "match": {
+          "promotion": {
+            "code": "SAVE5"
+          },
+          "discount": 5,
+          "cart": [
+            {
+              "productId": "p6",
+              "qty": 4
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

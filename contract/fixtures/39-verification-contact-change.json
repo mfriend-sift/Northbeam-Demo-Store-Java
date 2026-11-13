@@ -1,0 +1,201 @@
+{
+  "name": "39-verification-contact-change",
+  "description": "Changing the email or phone voids verification (DEMO=1 clock). A code started, then the email changed (PUT /api/account): confirming it is 409 'No verification is in progress'. A new code and 123456 verify the account; changing the phone then sets verified back to false, and a new code can be started (not 409 already verified). Changing only the name leaves verified true.",
+  "demo": true,
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/signup",
+        "body": {
+          "name": "Fixture Shopper",
+          "email": "ver8+{{runId}}@example.com",
+          "phone": "415-555-0199",
+          "password": "Demo!2026"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "schema": "UserPublic@user"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/start",
+        "headers": {
+          "X-Demo-Now": "4102444800000"
+        },
+        "body": {
+          "channel": "email"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "status": "pending"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account",
+        "body": {
+          "email": "ver8b+{{runId}}@example.com"
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "headers": {
+          "X-Demo-Now": "4102444800000"
+        },
+        "body": {
+          "code": "123456"
+        }
+      },
+      "expect": {
+        "status": 409,
+        "schema": "Error",
+        "match": {
+          "error": "No verification is in progress"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/start",
+        "headers": {
+          "X-Demo-Now": "4102444831000"
+        },
+        "body": {
+          "channel": "email"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "status": "pending"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "headers": {
+          "X-Demo-Now": "4102444831000"
+        },
+        "body": {
+          "code": "123456"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "status": "success",
+          "verified": true
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account",
+        "body": {
+          "name": "Fixture Renamed"
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "Account@user",
+        "match": {
+          "user": {
+            "verified": true
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "path": "/api/account",
+        "body": {
+          "phone": "415-555-0188"
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/api/account"
+      },
+      "expect": {
+        "status": 200,
+        "schema": "Account@user",
+        "match": {
+          "user": {
+            "verified": false
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/start",
+        "headers": {
+          "X-Demo-Now": "4102444862000"
+        },
+        "body": {
+          "channel": "sms"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "status": "pending",
+          "channel": "sms"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/verification/confirm",
+        "headers": {
+          "X-Demo-Now": "4102444862000"
+        },
+        "body": {
+          "code": "123456"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "match": {
+          "status": "success",
+          "verified": true
+        }
+      }
+    }
+  ]
+}
