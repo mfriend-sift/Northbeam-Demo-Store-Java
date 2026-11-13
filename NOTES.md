@@ -1,6 +1,6 @@
 # Build notes (Java port)
 
-Judgement calls and findings from the unattended build of 2026-11-13 (plan: Sift-Integration-Engine `docs/plan/2026-11-12/2026-11-12-java-demo-store-plan_v2.md`).
+Judgement calls and findings from the unattended build of 2026-11-13 (plan: the engine repo, `docs/plan/2026-11-12/2026-11-12-java-demo-store-plan_v2.md`).
 
 ## Spring error-order spike (the plan's first step)
 
