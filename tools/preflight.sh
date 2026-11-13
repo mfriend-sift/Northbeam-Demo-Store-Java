@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Usage: tools/preflight.sh [--port 3000]     (an optional language word is accepted and ignored)
 #   One line per check: "OK <check> <detail>" or "FAIL <check> <detail>"; exit 1 if any FAIL.
-#   Checks: node >= 18 (the contract test and the engine tools); a JDK (java 21 or newer; JAVA_HOME, else java on PATH, else the Homebrew openjdk@21); the store port (default 3000) and the mock port (MOCK_PORT, default 4010)
+#   Checks: node >= 18 (the contract test and the engine tools); a JDK (java 21 or newer; JAVA_HOME, else the Homebrew openjdk@21, else java_home, else java on PATH: tools/jdk.sh); the store port (default 3000) and the mock port (MOCK_PORT, default 4010)
 #           free (or the mock already up there); ENGINE_DIR exists and contains app/tools/tree-hash.mjs;
 #           how localhost resolves.
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -26,11 +26,7 @@ if command -v node >/dev/null; then
   if [ "$major" -ge 18 ]; then ok node "$(node -v)"; else fail node "$(node -v) is older than 18"; fi
 else fail node "not found"; fi
 
-JAVA_BIN=""
-if [ -n "${JAVA_HOME:-}" ] && [ -x "$JAVA_HOME/bin/java" ]; then JAVA_BIN="$JAVA_HOME/bin/java"
-elif [ -x /opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin/java ]; then JAVA_BIN=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin/java
-elif /usr/libexec/java_home >/dev/null 2>&1; then JAVA_BIN="$(/usr/libexec/java_home)/bin/java"
-elif command -v java >/dev/null; then JAVA_BIN="$(command -v java)"; fi
+. "$ROOT/tools/jdk.sh"; find_jdk
 if [ -n "$JAVA_BIN" ]; then
   jmajor=$("$JAVA_BIN" -version 2>&1 | sed -n '1s/.*version "\([0-9]*\).*/\1/p')
   if [ "${jmajor:-0}" -ge 21 ] 2>/dev/null; then ok java "$jmajor ($JAVA_BIN)"; else fail java "${jmajor:-unknown} is older than 21 (the store targets Java 21)"; fi

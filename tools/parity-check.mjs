@@ -76,6 +76,9 @@ script("routes: reads and path forms", [
   get("/api/nothing"), post("/api/products", {}), put("/api/products", {}), { method: "PATCH", path: "/api/cart", body: {} }, get("//api/products"), get("/api//products"),
   get("/api/pro%zzducts"), get("/%zz"), get("/api/products", { headers: { Accept: "a/b/c" } }), get("/api/products", { headers: { Accept: "text/html" } }),
   get("/api/cart"), get("/api/cart/"), get("/api/account"), get("/api/orders"), get("/api/signup"), get("/api/login"), get("/webhooks/gateway"), get("/webhooks"), get("/api"), get("/api/"),
+  // raw characters some servers refuse before routing (| [ ] ^ { } and the backtick), a path and a query, and the plain /error path
+  get("/?q={a}"), get("/?x=[1]"), get("/api/products?a=|b"), get("/api/products?a=`b"), get("/api/products?a=^b"), get("/a|b"), get("/a{b}"), get("/error"), get("/ERROR"), get("/error/"),
+  get("/.DS_Store"), get("/.git/config"), get("/img/.x"), get("/%2eDS_Store"),
 ]);
 script("static files and the page", [
   get("/"), get("/index.html"), get("/app.js"), get("/styles.css"), get("/demo-drawer.js"), get("/img/wool-beanie.jpg"), get("/img/CREDITS.md"), get("/img/"), get("/index.html/"), get("/app.js/"), get("/APP.JS"), get("/img/%2e%2e/app.js"), get("/img/../app.js"), get("/img/%zz.jpg"), { method: "HEAD", path: "/app.js" }, { method: "POST", path: "/app.js", body: {} }, get("/app.js", { headers: { Range: "bytes=0-9" } }), get("/img/missing.jpg"), get("/nonexistent.png"), get("/.env"), get("/contract/seed.json"), get("/tools/run.sh"), get("/public/app.js"),
@@ -263,6 +266,12 @@ script("known deviation: OPTIONS without DEMO", [
 ], { known: true });
 
 // Known difference: the reference redirects a directory path without its trailing slash (301 to /img/); this store answers its JSON 404.
+// Known difference: the reference removes the card and then answers 415 when the path is spelled in another letter case or with a trailing slash
+// and the body is not JSON (it reads the body for a profile change after the change was made); this store answers 200 and never a 415 for a change it made.
+script("known deviation: card removal with a text body and an odd path spelling", [
+  login(), put("/api/account/payment-method", visa), del("/api/Account/payment-method/", { body: "x", headers: { "Content-Type": "text/plain" } }),
+  put("/api/account/payment-method", visa), del("/API/ACCOUNT/PAYMENT-METHOD", { body: "x", headers: { "Content-Type": "text/plain" } }),
+], { known: true });
 script("known deviation: directory path without a slash", [get("/img")], { known: true });
 
 // ---- cookies and the session ----

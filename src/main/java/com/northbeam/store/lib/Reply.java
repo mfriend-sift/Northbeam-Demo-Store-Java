@@ -10,9 +10,9 @@ import java.nio.charset.StandardCharsets;
  * Routes write it straight to the servlet response (no Spring message converters: they read request headers the store does not control).
  */
 public record Reply(int status, String body) {
-    public static Reply json(int status, Object value) { return new Reply(status, Json.stringify(value)); }
+    public static Reply json(int status, Object value) { return new Reply(status, JsonText.stringify(value)); }
 
-    public static Reply error(int status, String message) { return new Reply(status, Json.stringify(new JsObject().set("error", message))); }
+    public static Reply error(int status, String message) { return new Reply(status, JsonText.stringify(new JsObject().set("error", message))); }
 
     /** Writes the whole answer. The container leaves the body out of a HEAD answer and keeps the length. */
     public void writeTo(HttpServletResponse res) {

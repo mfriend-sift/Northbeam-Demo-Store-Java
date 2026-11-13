@@ -6,7 +6,7 @@ import com.northbeam.store.lib.Db;
 import com.northbeam.store.lib.Gate;
 import com.northbeam.store.lib.Js;
 import com.northbeam.store.lib.JsObject;
-import com.northbeam.store.lib.Json;
+import com.northbeam.store.lib.JsonText;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -93,7 +93,7 @@ class LockProbeTest {
         for (String c : cookies) saves.add(() -> call("POST", "/api/orders", c, "{\"shippingAddress\":" + ADDR + ",\"billingAddress\":" + ADDR + "}"));
         int carried = 0;
         for (Answer a : parallel(pool, saves)) {
-            if (a.status() == 201 && Json.parse(a.body()) instanceof JsObject o && o.get("order") instanceof JsObject order && order.containsKey("promotion")) carried++;
+            if (a.status() == 201 && JsonText.parse(a.body()) instanceof JsObject o && o.get("order") instanceof JsObject order && order.containsKey("promotion")) carried++;
         }
         double uses = Db.sync(() -> {
             Double v = Db.promoUses.get("LIMITED25");
@@ -136,14 +136,23 @@ class LockProbeTest {
             boolean detected = false;
             Gate.useLock(new NoLock());
             try {
+                int setupFailures = 0;
                 for (int i = 0; i < 40 && !detected; i++) {
                     Round r;
+                    // Only a wrong answer counts as detection. A round that throws (a setup step failed) says nothing about the lock:
+                    // print the cause and play the round again.
                     try { r = round(pool); }
-                    catch (Exception e) { System.out.println("[no lock] round " + (i + 1) + ": " + e + ": race detected (good)"); detected = true; break; }
+                    catch (Exception e) {
+                        setupFailures++;
+                        System.out.println("[no lock] round " + (i + 1) + ": setup failed, not a detection: " + e);
+                        for (Throwable c = e.getCause(); c != null; c = c.getCause()) System.out.println("[no lock]   caused by " + c);
+                        continue;
+                    }
                     detected = !r.right();
                     System.out.println("[no lock] round " + (i + 1) + ": LIMITED25 orders " + r.carried() + ", uses " + r.uses() + ", statuses " + r.statuses() + ", failure records " + r.fails()
                         + (detected ? ": race detected (good)" : ": no difference yet"));
                 }
+                if (!detected) System.out.println("[no lock] no wrong answer in 40 rounds (" + setupFailures + " rounds failed in setup)");
             } finally {
                 Gate.useLock(new java.util.concurrent.locks.ReentrantLock());
             }

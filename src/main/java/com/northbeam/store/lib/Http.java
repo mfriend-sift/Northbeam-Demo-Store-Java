@@ -35,8 +35,8 @@ public final class Http {
         if (has && !isJson) throw new ApiException(415, "Content-Type must be application/json");
         if (!(req.getAttribute(RAW_KEY) instanceof byte[] raw) || raw.length == 0) return new JsObject();
         Object data;
-        try { data = Json.parse(new String(raw, StandardCharsets.UTF_8)); }
-        catch (Json.FormatException e) { throw new ApiException(400, "Invalid JSON"); }
+        try { data = JsonText.parse(new String(raw, StandardCharsets.UTF_8)); }
+        catch (JsonText.FormatException e) { throw new ApiException(400, "Invalid JSON"); }
         if (data instanceof JsObject obj) return obj;
         if (objectOnly) throw new ApiException(400, "Request body must be a JSON object");
         return new JsObject();

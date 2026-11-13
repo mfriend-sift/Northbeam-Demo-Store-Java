@@ -12,8 +12,8 @@ import java.util.Map;
  * The parser is iterative (a 100 KB body of nested brackets must not overflow the stack), takes the last of two
  * equal keys, accepts lone surrogate escapes, and reads numbers as doubles (1e400 is Infinity, as in JavaScript).
  */
-public final class Json {
-    private Json() {}
+public final class JsonText {
+    private JsonText() {}
 
     /** Thrown for text that is not JSON. */
     public static final class FormatException extends RuntimeException {

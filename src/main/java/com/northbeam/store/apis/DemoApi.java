@@ -9,7 +9,7 @@ import com.northbeam.store.lib.Js;
 import com.northbeam.store.lib.JsObject;
 import com.northbeam.store.lib.Mailer;
 import com.northbeam.store.lib.Models.Order;
-import com.northbeam.store.lib.Json;
+import com.northbeam.store.lib.JsonText;
 import com.northbeam.store.lib.Reply;
 import com.northbeam.store.lib.Sessions;
 import jakarta.servlet.http.HttpServletRequest;
@@ -62,7 +62,7 @@ public class DemoApi {
             HttpResponse<String> r = UPSTREAM.send(HttpRequest.newBuilder(URI.create(baseUrl + "/__log?since=" + Js.num(since))).timeout(Duration.ofSeconds(2)).GET().build(),
                 HttpResponse.BodyHandlers.ofString());
             if (r.statusCode() < 200 || r.statusCode() > 299) throw new IllegalStateException("status " + r.statusCode());
-            reply = Reply.json(200, Json.parse(r.body()));
+            reply = Reply.json(200, JsonText.parse(r.body()));
         } catch (Exception e) {
             if (e instanceof InterruptedException) Thread.currentThread().interrupt();
             reply = Reply.json(200, new JsObject().set("records", new ArrayList<>()).set("nextSeq", since).set("mockUp", false).set("error", "mock unreachable"));

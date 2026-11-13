@@ -5,5 +5,5 @@
 #     tools/lock-probe/run.sh
 set -u
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-[ -n "${JAVA_HOME:-}" ] || { [ -d /opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home ] && export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home; }
+. "$ROOT/tools/jdk.sh"; find_jdk; [ -n "$JDK_HOME" ] && export JAVA_HOME="$JDK_HOME"
 cd "$ROOT" && exec ./mvnw -q -B test -Dtest=LockProbeTest -Dsurefire.failIfNoSpecifiedTests=true

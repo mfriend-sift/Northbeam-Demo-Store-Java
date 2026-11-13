@@ -27,7 +27,11 @@ Tomcat rejects a path with a bad percent escape (`%zz`, or bytes that are not UT
 - `tools/run.sh` (unchanged from A0) sets `ENGINE_ORIGIN` to the mock's address; with the build mock on 4070 the CORS fixture 14 (which pins 4010) fails unless the store is started with `ENGINE_ORIGIN=http://localhost:4010`. This is a test-setup effect, not a store difference.
 - **Lock probe is a JUnit test** (`src/test/java/.../LockProbeTest`, run by `tools/lock-probe/run.sh`), not a separate project: it starts the real application on a random port. The lock is swappable through `Gate.useLock` (a seam used only by that test). Without the real lock the race is rare per round, so the probe runs up to 40 rounds with no lock and needs one wrong round.
 - Password hashing is PBKDF2-HMAC-SHA256 written over `javax.crypto.Mac` (10,000 iterations, 8-byte salt, `salt:digest` hex), because the JDK's `PBEKeySpec` path refuses an empty password and takes `char[]`; the hash format matches the .NET store's.
-- `X-Demo-Now` outside years 0001 to 9999 gives a 500, as the .NET store (Java's `Instant` would otherwise print an expanded year).
+- `X-Demo-Now` outside years 0001 to 9999 gives 500 as the .NET store does for a route that reads the clock, but a request that changes something (not GET, HEAD or OPTIONS) is refused in `Middleware.demo` before any change is made (the .NET store has already made it). The contract does not cover the case; parity-check does, and the answers match.
+
+## For the engine's Java hints
+
+- The session id is held on the request as an attribute (`Sessions.idOf`, `Sessions.of`), not read from `request.getCookies()`. A scan that looks for the session in `getCookies()` finds nothing in this store: the hint should say to read the store's session accessor, and to take the session id and the user id from it for `_session_id` and `$user_id`.
 
 ## Known gaps
 

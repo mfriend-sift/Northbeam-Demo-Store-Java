@@ -56,7 +56,10 @@ cleanup() {
     rm -rf "$RUN_TMP"
   fi
 }
-trap 'cleanup; exit 0' INT TERM EXIT
+# The EXIT trap only cleans up, so a failed preflight or build keeps its own exit status; a stop (TERM, or Ctrl-C) is a normal end.
+trap cleanup EXIT
+trap 'exit 0' TERM
+trap 'exit 130' INT
 
 if [ "$START_MOCK" = 1 ] && ! curl -fsS -m 2 "http://127.0.0.1:$MOCK_PORT/__log" >/dev/null 2>&1; then
   RUN_TMP="$(mktemp -d "${TMPDIR:-/tmp}/store-run.XXXXXX")" || { echo "mktemp failed" >&2; exit 1; }
@@ -79,9 +82,11 @@ export PORT DEMO=1 BUILD_HASH STORE_VERSION SIFT_API_URL="http://localhost:$MOCK
 # The engine page is served by the mock, so a store started by hand on another pair answers CORS for that origin (the launcher sets ENGINE_ORIGIN itself).
 export ENGINE_ORIGIN="${ENGINE_ORIGIN:-http://localhost:$MOCK_PORT}"
 # Build the jar (the first build downloads Spring Boot from Maven Central into ~/.m2), then run it with exec so STORE_PID is the JVM itself.
-[ -n "${JAVA_HOME:-}" ] || { [ -d /opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home ] && export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home; }
+. "$ROOT/tools/jdk.sh"; find_jdk
+[ -n "$JDK_HOME" ] && export JAVA_HOME="$JDK_HOME"
+[ -n "$JAVA_BIN" ] || { echo "no JDK found (see README)" >&2; exit 1; }
 (cd "$ROOT" && ./mvnw -q -B -DskipTests package) || { echo "build failed" >&2; exit 1; }
-(cd "$ROOT" && exec "${JAVA_HOME:+$JAVA_HOME/bin/}java" -jar target/store.jar) &
+(cd "$ROOT" && exec "$JAVA_BIN" -jar target/store.jar) &
 STORE_PID=$!
 PIDS+=($STORE_PID)
 if [ -n "$MOCK_PID" ]; then

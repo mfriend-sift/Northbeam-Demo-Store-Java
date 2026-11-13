@@ -64,6 +64,8 @@ public final class Middleware extends OncePerRequestFilter {
         }
     }
 
+    private static final Set<String> SAFE_METHODS = Set.of("GET", "HEAD", "OPTIONS");
+
     // Demo-mode step, only when DEMO=1 (set by tools/run.sh).
     // CORS for the engine origin, plus the persona headers (contract: demo-static.md and the engine's FREEZE.md section 11).
     // Returns the request the rest sees (with the persona), or null when the request was answered here.
@@ -83,7 +85,12 @@ public final class Middleware extends OncePerRequestFilter {
         String ip = header(req, "X-Demo-Client-Ip");
         String agent = header(req, "X-Demo-User-Agent");
         double now = Js.toNumber(header(req, "X-Demo-Now"));
-        if (!Double.isNaN(now) && !Double.isInfinite(now) && now > 0 && Clock.inRange(now)) req.setAttribute(Clock.DEMO_NOW_KEY, now);
+        if (!Double.isNaN(now) && !Double.isInfinite(now) && now > 0) {
+            // A time past year 9999 has no four-digit year, so any route that reads the clock answers 500 (as the reference store's).
+            // A request that changes something is refused here, before any change; a read keeps the answer of its route.
+            if (!Clock.inRange(now) && !SAFE_METHODS.contains(req.getMethod())) { Reply.error(500, "Something went wrong").writeTo(res); return null; }
+            req.setAttribute(Clock.DEMO_NOW_KEY, now);
+        }
         return new Persona(req, ip == null || ip.isEmpty() ? null : ip, agent == null || agent.isEmpty() ? null : agent);
     }
 

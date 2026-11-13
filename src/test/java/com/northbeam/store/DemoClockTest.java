@@ -24,16 +24,23 @@ class DemoClockTest {
     @LocalServerPort int port;
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
 
-    private HttpResponse<String> login(String now) throws Exception {
-        HttpRequest.Builder b = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + "/api/login")).timeout(Duration.ofSeconds(20))
-            .header("Content-Type", "application/json").header("X-Demo-Now", now)
-            .POST(HttpRequest.BodyPublishers.ofString("{\"email\":\"avery.alder@example.com\",\"password\":\"Demo!2026\"}"));
+    private HttpResponse<String> send(String method, String path, String cookie, String now, String body) throws Exception {
+        HttpRequest.Builder b = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + path)).timeout(Duration.ofSeconds(20)).header("Content-Type", "application/json");
+        if (now != null) b.header("X-Demo-Now", now);
+        if (cookie != null) b.header("Cookie", cookie);
+        b.method(method, body == null ? HttpRequest.BodyPublishers.noBody() : HttpRequest.BodyPublishers.ofString(body));
         return http.send(b.build(), HttpResponse.BodyHandlers.ofString());
     }
 
-    @Test void outOfRangeDemoClockIsIgnored() throws Exception {
-        for (String now : new String[] { "1e20", "300000000000000", "253402300800000" })
-            assertEquals(200, login(now).statusCode(), now);
-        assertEquals(200, login("4102444800000").statusCode());
+    @Test void outOfRangeDemoClockOnAChangeIsRefusedBeforeAnyStateChanges() throws Exception {
+        String cookie = send("GET", "/api/products", null, null, null).headers().firstValue("Set-Cookie").orElseThrow().split(";")[0];
+        for (String now : new String[] { "1e20", "300000000000000", "253402300800000" }) {
+            HttpResponse<String> r = send("POST", "/api/login", cookie, now, "{\"email\":\"avery.alder@example.com\",\"password\":\"Demo!2026\"}");
+            assertEquals(500, r.statusCode(), now);
+            // the failed request signed nobody in
+            assertEquals(401, send("GET", "/api/account", cookie, null, null).statusCode(), now);
+        }
+        HttpResponse<String> ok = send("POST", "/api/login", cookie, "4102444800000", "{\"email\":\"avery.alder@example.com\",\"password\":\"Demo!2026\"}");
+        assertEquals(200, ok.statusCode());
     }
 }

@@ -65,7 +65,7 @@ public final class Db {
         try { text = Files.readString(contentRoot.resolve("contract").resolve("seed.json"), StandardCharsets.UTF_8); }
         catch (IOException e) { throw new IllegalStateException("cannot read contract/seed.json: run the store from the repo folder", e); }
         sync(() -> {
-            seed = obj(Json.parse(text));
+            seed = obj(JsonText.parse(text));
             seedUsers.clear();
             for (Object raw : list(seed.get("users"))) {
                 JsObject u = obj(raw);
@@ -135,7 +135,7 @@ public final class Db {
         });
     }
 
-    private static JsObject cloneObject(JsObject o) { return obj(Json.parse(Json.stringify(o))); }
+    private static JsObject cloneObject(JsObject o) { return obj(JsonText.parse(JsonText.stringify(o))); }
 
     private static Order orderFromSeed(JsObject s) {
         Order o = new Order();

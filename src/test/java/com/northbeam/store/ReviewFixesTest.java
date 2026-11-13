@@ -25,10 +25,12 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 /**
  * Review fixes, run against the store's real pipeline on a random loopback port with DEMO off.
+
+ * (The extra property keeps this context apart from the lock probe's: a shared context would have been built with DEMO off.)
  * "DEMO=1" is given to Spring's own environment (as `java -jar store.jar --DEMO=1` would) but not to the process
  * environment: the store has one reading of DEMO (Config.demo), and that one says off.
  */
-@SpringBootTest(classes = StoreApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "DEMO=1")
+@SpringBootTest(classes = StoreApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = { "DEMO=1", "nb.test=review-fixes" })
 class ReviewFixesTest {
     private static String savedDemo;
 

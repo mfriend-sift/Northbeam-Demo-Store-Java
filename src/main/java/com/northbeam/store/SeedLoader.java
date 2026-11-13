@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 /** Startup: the data is loaded from contract/seed.json before the first request, and the port line is printed once it listens. */
 @Component
-public class Boot {
+public class SeedLoader {
     @PostConstruct
     public void load() { Db.load(Path.of("").toAbsolutePath()); }
 
